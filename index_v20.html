@@ -1,0 +1,1854 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LAO Conduite 2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js">
+function exportWord(){
+  var enc=new TextEncoder();
+  function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+  var C={
+    TITRE_BG:'1A2744',TITRE_FG:'FFD54F',
+    IDENT_BG:'455A64',IDENT_FG:'ECEFF1',
+    LEGER_BG:'1976D2',LEGER_FG:'E3F2FD',
+    LOURD_BG:'7B1FA2',LOURD_FG:'F3E5F5',
+    REMORQ_BG:'388E3C',REMORQ_FG:'E8F5E9',
+    NAUTIQ_BG:'00796B',NAUTIQ_FG:'E0F2F1',
+    HI_BG:'37474F',HI_FG:'ECEFF1',
+    HL_BG:'0D47A1',HL_FG:'E3F2FD',
+    HLO_BG:'4A148C',HLO_FG:'F3E5F5',
+    HR_BG:'1B5E20',HR_FG:'E8F5E9',
+    HN_BG:'004D40',HN_FG:'E0F2F1',
+    HD_BG:'01579B',HD_FG:'E1F5FE',
+    DI:'ECEFF1',DL:'E3F2FD',DLO:'F3E5F5',DR:'E8F5E9',DN:'E0F2F1',
+    V_BG:'C8E6C9',V_FG:'1B5E20',X_BG:'FFCDD2',X_FG:'B71C1C',
+    OR_BG:'FFE0B2',OR_FG:'E65100',DUR_BG:'FFF9C4',DUR_FG:'F57F17',
+    EMPTY:'F5F5F5',TEXT:'263238'
+  };
+  function dateCls(s,dk){
+    if(!s)return null;
+    var p=s.split('/'),d=new Date(+p[2],+p[1]-1,+p[0]);
+    var exp=new Date(d.getTime()+durees[dk]*86400000),now=new Date();
+    if(exp<now)return 'R';
+    if(exp<new Date(now.getTime()+180*86400000))return 'O';
+    return 'V';
+  }
+  function grpBg(c){
+    if(c<=6)return C.DI;if(c<=14)return C.DL;if(c<=24)return C.DLO;
+    if(c<=27)return C.DR;return C.DN;
+  }
+  var W=[540,430,1100,900,540,810,500,500,500,810,500,810,540,500,
+         500,810,500,810,500,810,500,810,500,810,500,500,500,500,500];
+  var totalW=W.reduce(function(a,b){return a+b;},0);
+
+  function wspan(c1,c2){var s=0;for(var i=c1-1;i<c2;i++)s+=W[i];return s;}
+
+  function tcs(text,bg,fg,bold,sz,c1,c2,ha){
+    var span=c2>c1?'<w:gridSpan><w:val>'+(c2-c1+1)+'</w:val></w:gridSpan>':'';
+    var w=wspan(c1,c2);
+    var halign=ha==='right'?'right':ha==='left'?'left':'center';
+    return '<w:tc>'+
+      '<w:tcPr>'+span+
+      '<w:tcW w:w="'+w+'" w:type="dxa"/>'+
+      '<w:shd w:val="clear" w:color="auto" w:fill="'+bg+'"/>'+
+      '<w:tcMar><w:top w:w="40" w:type="dxa"/><w:bottom w:w="40" w:type="dxa"/><w:left w:w="60" w:type="dxa"/><w:right w:w="60" w:type="dxa"/></w:tcMar>'+
+      '<w:vAlign w:val="center"/></w:tcPr>'+
+      '<w:p><w:pPr><w:jc w:val="'+halign+'"/><w:spacing w:before="0" w:after="0"/></w:pPr>'+
+      '<w:r><w:rPr>'+(bold?'<w:b/>':'')+'<w:color w:val="'+fg+'"/>'+
+      '<w:sz w:val="'+(sz||20)+'"/><w:szCs w:val="'+(sz||20)+'"/>'+
+      '<w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/></w:rPr>'+
+      '<w:t xml:space="preserve">'+esc(text)+'</w:t></w:r></w:p></w:tc>';
+  }
+
+  function row(h,cells){return '<w:tr><w:trPr><w:trHeight w:val="'+h+'" w:hRule="exact"/></w:trPr>'+cells+'</w:tr>';}
+
+  // ROW 1 Titre
+  var r1=row(420,tcs('LAO CONDUITE 2026 - Centre de Secours',C.TITRE_BG,C.TITRE_FG,true,28,1,29,'center'));
+
+  // ROW 2 Groupes
+  var r2=row(300,
+    tcs('IDENTIFICATION',C.IDENT_BG,C.IDENT_FG,true,22,1,6)+
+    tcs('GROUPE LEGER',C.LEGER_BG,C.LEGER_FG,true,22,7,14)+
+    tcs('GROUPE LOURD',C.LOURD_BG,C.LOURD_FG,true,22,15,24)+
+    tcs('GROUPE REMORQUE',C.REMORQ_BG,C.REMORQ_FG,true,22,25,27)+
+    tcs('GROUPE NAUTIQUE',C.NAUTIQ_BG,C.NAUTIQ_FG,true,22,28,29)
+  );
+
+  // ROW 3 Durees
+  var durVals={6:'5 ans',10:'3 ans',12:'3 ans',16:'3 ans',18:'3 ans',20:'3 ans',22:'3 ans',24:'3 ans'};
+  var r3c=tcs('Duree validite :',C.DUR_BG,C.DUR_FG,true,18,1,5,'right');
+  r3c+=tcs(durVals[6],C.DUR_BG,C.DUR_FG,true,18,6,6);
+  r3c+=tcs('',C.DUR_BG,C.DUR_FG,false,16,7,9);
+  r3c+=tcs(durVals[10],C.DUR_BG,C.DUR_FG,true,18,10,10);
+  r3c+=tcs('',C.DUR_BG,C.DUR_FG,false,16,11,11);
+  r3c+=tcs(durVals[12],C.DUR_BG,C.DUR_FG,true,18,12,12);
+  r3c+=tcs('',C.DUR_BG,C.DUR_FG,false,16,13,14);
+  r3c+=tcs('',C.DUR_BG,C.DUR_FG,false,16,15,15);
+  r3c+=tcs(durVals[16],C.DUR_BG,C.DUR_FG,true,18,16,16);
+  r3c+=tcs('',C.DUR_BG,C.DUR_FG,false,16,17,17);
+  r3c+=tcs(durVals[18],C.DUR_BG,C.DUR_FG,true,18,18,18);
+  r3c+=tcs('',C.DUR_BG,C.DUR_FG,false,16,19,19);
+  r3c+=tcs(durVals[20],C.DUR_BG,C.DUR_FG,true,18,20,20);
+  r3c+=tcs('',C.DUR_BG,C.DUR_FG,false,16,21,21);
+  r3c+=tcs(durVals[22],C.DUR_BG,C.DUR_FG,true,18,22,22);
+  r3c+=tcs('',C.DUR_BG,C.DUR_FG,false,16,23,23);
+  r3c+=tcs(durVals[24],C.DUR_BG,C.DUR_FG,true,18,24,24);
+  r3c+=tcs('',C.DUR_BG,C.DUR_FG,false,16,25,29);
+  var r3=row(260,r3c);
+
+  // ROW 4 Headers
+  var hdrs=[
+    [C.HI_BG,C.HI_FG,'Matr.'],[C.HI_BG,C.HI_FG,'Grade'],[C.HI_BG,C.HI_FG,'Nom'],
+    [C.HI_BG,C.HI_FG,'Prenom'],[C.HI_BG,C.HI_FG,'Statut'],[C.HI_BG,C.HI_FG,'Val Permis'],
+    [C.HL_BG,C.HL_FG,'VL Hors Urg'],[C.HL_BG,C.HL_FG,'VL VTUL VSAV'],[C.HL_BG,C.HL_FG,'VLM'],
+    [C.HD_BG,C.HD_FG,'Date FMPA VLM'],[C.HL_BG,C.HL_FG,'VLTT'],[C.HD_BG,C.HD_FG,'Date FMPA VLTT'],
+    [C.HL_BG,C.HL_FG,'VLSMTT'],[C.HL_BG,C.HL_FG,'VPSI'],
+    [C.HLO_BG,C.HLO_FG,'FPT VSR'],[C.HD_BG,C.HD_FG,'Date FMPA FPT'],
+    [C.HLO_BG,C.HLO_FG,'EPS'],[C.HD_BG,C.HD_FG,'Date FMPA EPS'],
+    [C.HLO_BG,C.HLO_FG,'CCFM'],[C.HD_BG,C.HD_FG,'Date FMPA CCFM'],
+    [C.HLO_BG,C.HLO_FG,'CCFS'],[C.HD_BG,C.HD_FG,'Date FMPA CCFS'],
+    [C.HLO_BG,C.HLO_FG,'VPCE'],[C.HD_BG,C.HD_FG,'Date FMPA VPCE'],
+    [C.HR_BG,C.HR_FG,'RESPE'],[C.HR_BG,C.HR_FG,'REM BLS'],[C.HR_BG,C.HR_FG,'REM BRS'],
+    [C.HN_BG,C.HN_FG,'BLS'],[C.HN_BG,C.HN_FG,'BRS']
+  ];
+  var r4c='';
+  hdrs.forEach(function(h,i){r4c+=tcs(h[2],h[0],h[1],true,16,i+1,i+1,'center');});
+  var r4=row(580,r4c);
+
+  // DONNEES
+  var CI={7:1,8:1,9:1,11:1,13:1,14:1,15:1,17:1,19:1,21:1,23:1,25:1,26:1,27:1,28:1,29:1};
+  var DI={6:'permis',10:'fmpa_vlm',12:'fmpa_vltt',16:'fmpa_fpt',
+    18:'fmpa_eps',20:'fmpa_ccfm',22:'fmpa_ccfs',24:'fmpa_vpce'};
+  var DUREF={permis:'permis',fmpa_vlm:'vlm',fmpa_vltt:'vltt',fmpa_fpt:'fpt',
+    fmpa_eps:'eps',fmpa_ccfm:'ccfm',fmpa_ccfs:'ccfs',fmpa_vpce:'vpce'};
+
+  var dataXml='';
+  agents.forEach(function(a){
+    var rv=[a.matr,a.grade,a.nom,a.prenom,a.statut,a.permis,
+      a.vl_hu,a.vl_vtul,a.vlm,a.fmpa_vlm,a.vltt,a.fmpa_vltt,a.vlsmtt,a.vpsi,
+      a.fpt,a.fmpa_fpt,a.eps,a.fmpa_eps,a.ccfm,a.fmpa_ccfm,
+      a.ccfs,a.fmpa_ccfs,a.vpce,a.fmpa_vpce,
+      a.respe,a.rem_bls,a.rem_brs,a.bls,a.brs];
+    var cells='';
+    for(var c=1;c<=29;c++){
+      var val=rv[c-1]||'';
+      if(CI[c]){
+        var v=val||'X';
+        cells+=tcs(v,v==='V'?C.V_BG:C.X_BG,v==='V'?C.V_FG:C.X_FG,true,20,c,c);
+      } else if(DI[c]){
+        var dk=DUREF[DI[c]];
+        var dc=dateCls(val,dk);
+        var bg=dc==='R'?C.X_BG:dc==='O'?C.OR_BG:dc==='V'?C.V_BG:C.EMPTY;
+        var fg=dc==='R'?C.X_FG:dc==='O'?C.OR_FG:dc==='V'?C.V_FG:C.TEXT;
+        cells+=tcs(val,bg,fg,!!dc,18,c,c);
+      } else {
+        var bg2=grpBg(c);
+        var ha=c>=3&&c<=5?'left':'center';
+        cells+=tcs(val,bg2,C.TEXT,c===3,18,c,c,ha);
+      }
+    }
+    dataXml+=row(200,cells);
+  });
+
+  // Grille colonnes
+  var gridXml='<w:tblGrid>';
+  W.forEach(function(w){gridXml+='<w:gridCol w:w="'+w+'"/>';});
+  gridXml+='</w:tblGrid>';
+
+  var tblXml='<w:tbl>'+
+    '<w:tblPr><w:tblW w:w="'+totalW+'" w:type="dxa"/>'+
+    '<w:tblBorders>'+
+    '<w:insideH w:val="single" w:sz="2" w:color="B0BEC5"/>'+
+    '<w:insideV w:val="single" w:sz="2" w:color="B0BEC5"/>'+
+    '</w:tblBorders>'+
+    '<w:tblLayout w:type="fixed"/></w:tblPr>'+
+    gridXml+r1+r2+r3+r4+dataXml+'</w:tbl>';
+
+  var NS='xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"';
+  var docXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'+
+    '<w:document '+NS+'>'+
+    '<w:body>'+tblXml+
+    '<w:sectPr>'+
+    '<w:pgSz w:w="24480" w:h="15840" w:orient="landscape"/>'+
+    '<w:pgMar w:top="720" w:right="360" w:bottom="720" w:left="360" w:header="0" w:footer="0" w:gutter="0"/>'+
+    '</w:sectPr></w:body></w:document>';
+
+  var files={
+    '[Content_Types].xml':'<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/></Types>',
+    '_rels/.rels':'<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>',
+    'word/document.xml':docXml,
+    'word/_rels/document.xml.rels':'<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>',
+    'word/styles.xml':'<?xml version="1.0" encoding="UTF-8"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/><w:sz w:val="18"/></w:rPr></w:rPrDefault></w:docDefaults></w:styles>'
+  };
+
+  function u16(n){return[n&255,(n>>8)&255];}
+  function u32(n){return[n&255,(n>>8)&255,(n>>16)&255,(n>>24)&255];}
+  function crc32(d){
+    var t=[];for(var i=0;i<256;i++){var c=i;for(var j=0;j<8;j++)c=c&1?(0xEDB88320^(c>>>1)):c>>>1;t[i]=c;}
+    var crc=0xFFFFFFFF;for(var i=0;i<d.length;i++)crc=t[(crc^d[i])&255]^(crc>>>8);return(crc^0xFFFFFFFF)>>>0;
+  }
+  var parts=[],cds=[],off=0;
+  Object.keys(files).forEach(function(name){
+    var nb=enc.encode(name),db=enc.encode(files[name]);
+    var crc=crc32(db),sz=db.length;
+    var lfh=[0x50,0x4B,0x03,0x04,0x14,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00]
+      .concat(u32(crc),u32(sz),u32(sz),u16(nb.length),u16(0)).concat(Array.from(nb));
+    var cd=[0x50,0x4B,0x01,0x02,0x14,0x00,0x14,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00]
+      .concat(u32(crc),u32(sz),u32(sz),u16(nb.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(off))
+      .concat(Array.from(nb));
+    cds.push(cd);off+=lfh.length+sz;parts.push(lfh);parts.push(Array.from(db));
+  });
+  var cdOff=off,cdSz=0;
+  cds.forEach(function(cd){cdSz+=cd.length;parts.push(cd);});
+  parts.push([0x50,0x4B,0x05,0x06,0x00,0x00,0x00,0x00]
+    .concat(u16(cds.length),u16(cds.length),u32(cdSz),u32(cdOff),u16(0)));
+  var all=[];parts.forEach(function(p){all=all.concat(p);});
+  var blob=new Blob([new Uint8Array(all)],{type:'application/vnd.openxmlformats-officedocument.wordprocessingml.document'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);a.download='LAO_Conduite_2026.docx';
+  a.click();URL.revokeObjectURL(a.href);
+}
+
+
+function exportJSON(){
+  var exportData={agents:agents,durees:{
+    6:durees.permis,10:durees.vlm,12:durees.vltt,16:durees.fpt,
+    18:durees.eps,20:durees.ccfm,22:durees.ccfs,24:durees.vpce
+  }};
+  var blob=new Blob([JSON.stringify(exportData)],{type:'application/json'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='LAO_donnees_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();URL.revokeObjectURL(a.href);
+}
+
+// Modal édition identification
+function openEditCell(td, idx, field){
+  var labels={matr:"Matricule",grade:"Grade",nom:"Nom",prenom:"Prénom",statut:"Statut"};
+  var gradeOpts=["","SAP","CAP","CCH","SCH","SGT","SGH","ADJ","ADC","S/C","C/C","CAL","LTN","CNE","CDT","LCL","COL"];
+  var statutOpts=["","SPV","SPP","SPP/SPV","SPV/SPP","JSP/SPV","SPV/BMP","PATS"];
+
+  document.getElementById("editLabel").textContent = labels[field]||field;
+  var inp = document.getElementById("editInp");
+  var sel = document.getElementById("editSel");
+
+  inp.style.display="none"; sel.style.display="none";
+
+  if(field==="grade"){
+    sel.innerHTML=""; gradeOpts.forEach(function(o){var opt=document.createElement("option");opt.value=o;opt.textContent=o||"-- Grade --";sel.appendChild(opt);});
+    sel.value=agents[idx][field]||""; sel.style.display="block"; sel.focus();
+  } else if(field==="statut"){
+    sel.innerHTML=""; statutOpts.forEach(function(o){var opt=document.createElement("option");opt.value=o;opt.textContent=o||"-- Statut --";sel.appendChild(opt);});
+    sel.value=agents[idx][field]||""; sel.style.display="block"; sel.focus();
+  } else {
+    inp.value=agents[idx][field]||"";
+    if(field==="nom") inp.style.textTransform="uppercase"; else inp.style.textTransform="";
+    inp.style.display="block"; inp.focus(); inp.select();
+  }
+
+  document.getElementById("editIdx").value=idx;
+  document.getElementById("editField").value=field;
+  document.getElementById("mEdit").classList.add("on");
+}
+
+function closeEdit(){document.getElementById("mEdit").classList.remove("on");}
+
+function okEdit(){
+  var idx=+document.getElementById("editIdx").value;
+  var field=document.getElementById("editField").value;
+  var inp=document.getElementById("editInp");
+  var sel=document.getElementById("editSel");
+  var val=(inp.style.display!=="none"?inp.value:sel.value).trim();
+  if(field==="nom"||field==="prenom") val=val.toUpperCase();
+  agents[idx][field]=val;
+
+  // Re-trier si nom changé
+  if(field==="nom"||field==="prenom"){
+    agents.sort(function(a,b){return (a.nom||"").localeCompare(b.nom||"");});
+    filtered=agents.map(function(_,i){return i;});
+    render();
+  } else {
+    // Juste mettre à jour la cellule
+    var tr=document.querySelector("tr[data-i='"+idx+"']");
+    if(tr){
+      var td=tr.querySelector("td[data-field-id='"+field+"']");
+      if(td) td.textContent=val;
+    }
+    // Reconstruire la ligne
+    applyFilters();
+  }
+  updateStats();saveData();closeEdit();
+}
+
+document.addEventListener("keydown",function(e){
+  if(e.key==="Escape"){closeMD();closeMAdd();closeEdit();}
+  if(e.key==="Enter"){
+    if(document.getElementById("mD").classList.contains("on"))okD();
+    if(document.getElementById("mEdit").classList.contains("on"))okEdit();
+  }
+});
+if(document.getElementById("mEdit")){
+  document.getElementById("mEdit").addEventListener("click",function(e){
+    if(e.target===document.getElementById("mEdit"))closeEdit();
+  });
+}
+
+function exportCSV(){
+  var rows=[
+    ["Matr","Grade","Nom","Prenom","Statut","Val Permis",
+     "VL Hors Urg","VL VTUL VSAV","VLM","Date FMPA VLM","VLTT","Date FMPA VLTT","VLSMTT","VPSI",
+     "FPT VSR","Date FMPA FPT","EPS","Date FMPA EPS","CCFM","Date FMPA CCFM",
+     "CCFS","Date FMPA CCFS","VPCE","Date FMPA VPCE",
+     "RESPE","REM BLS","REM BRS","BLS","BRS"]
+  ];
+  agents.forEach(function(a){
+    rows.push([
+      a.matr,a.grade,a.nom,a.prenom,a.statut,a.permis,
+      a.vl_hu,a.vl_vtul,a.vlm,a.fmpa_vlm,a.vltt,a.fmpa_vltt,a.vlsmtt,a.vpsi,
+      a.fpt,a.fmpa_fpt,a.eps,a.fmpa_eps,a.ccfm,a.fmpa_ccfm,
+      a.ccfs,a.fmpa_ccfs,a.vpce,a.fmpa_vpce,
+      a.respe,a.rem_bls,a.rem_brs,a.bls,a.brs
+    ]);
+  });
+  var csv=rows.map(function(r){
+    return r.map(function(v){
+      var s=String(v||"");
+      if(s.indexOf(",")>=0||s.indexOf('"')>=0||s.indexOf("\n")>=0)
+        s='"'+s.replace(/"/g,'""')+'"';
+      return s;
+    }).join(",");
+  }).join("\n");
+  // BOM UTF-8 pour Excel/Sheets
+  var blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="LAO_Conduite_2026_"+new Date().toISOString().slice(0,10)+".csv";
+  a.click();URL.revokeObjectURL(a.href);
+}
+
+// ============================================================
+// CONFIGURATION SUPABASE (API REST directe - sans librairie)
+// ============================================================
+var SUPABASE_URL = "https://uopmaczvqemynjtsrdrx.supabase.co";
+var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVvcG1hY3p2cWVteW5qdHNyZHJ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NDMzMjAsImV4cCI6MjA5NDUxOTMyMH0.58dbS6qtevsWzlzMjr840harZ4jpD7C8D4GagBkYsmU";
+var ADMIN_PASSWORD = "8888";
+var isAdmin = false;
+var isWriter = false;
+var supabaseEnabled = true;
+window.readOnly = false;
+
+// API REST Supabase directe avec fetch
+var SB = {
+  headers: {
+    "apikey": SUPABASE_KEY,
+    "Authorization": "Bearer " + SUPABASE_KEY,
+    "Content-Type": "application/json",
+    "Prefer": "return=representation"
+  },
+  url: function(table, params) {
+    return SUPABASE_URL + "/rest/v1/" + table + (params ? "?" + params : "");
+  },
+  get: async function(table, params) {
+    var r = await fetch(SB.url(table, params), {headers: SB.headers});
+    if(!r.ok) throw new Error(await r.text());
+    return await r.json();
+  },
+  post: async function(table, body) {
+    var r = await fetch(SB.url(table), {method:"POST", headers: SB.headers, body: JSON.stringify(body)});
+    if(!r.ok) throw new Error(await r.text());
+    return await r.json();
+  },
+  patch: async function(table, params, body) {
+    var r = await fetch(SB.url(table, params), {method:"PATCH", headers: Object.assign({}, SB.headers, {"Prefer":"return=representation"}), body: JSON.stringify(body)});
+    if(!r.ok) throw new Error(await r.text());
+    return await r.json();
+  },
+  delete: async function(table, params) {
+    var r = await fetch(SB.url(table, params), {method:"DELETE", headers: SB.headers});
+    if(!r.ok) throw new Error(await r.text());
+    return true;
+  },
+  upsert: async function(table, body, onConflict) {
+    var h = Object.assign({}, SB.headers, {"Prefer": "resolution=merge-duplicates,return=representation"});
+    if(onConflict) h["on-conflict"] = onConflict;
+    var r = await fetch(SB.url(table), {method:"POST", headers: h, body: JSON.stringify(body)});
+    if(!r.ok) throw new Error(await r.text());
+    return await r.json();
+  }
+};
+
+// Tester la connexion
+fetch(SB.url("lao_agents", "limit=1"), {headers: SB.headers})
+  .then(function(r){ 
+    if(r.ok){ console.log("Supabase connecte"); loadFromSupabase(); }
+    else { console.log("Supabase erreur:", r.status); supabaseEnabled=false; }
+  })
+  .catch(function(e){ console.log("Supabase non disponible:", e); supabaseEnabled=false; });
+
+
+// Charger les données depuis Supabase
+async function loadFromSupabase(){
+  if(!supabaseEnabled) return;
+  try {
+    var res = await SB.get("lao_agents", "order=nom");
+    if(res && res.length > 0){
+      agents = res;
+      // Mettre à jour aussi le localStorage avec les données Supabase
+      try { localStorage.setItem("lao_agents", JSON.stringify(agents)); } catch(e){}
+      filtered = agents.map(function(_,i){return i;});
+      applyFilters();
+      updateStats();
+      showSaveStatus("Donnees chargees depuis Supabase ("+agents.length+" agents)");
+      console.log("Charges depuis Supabase:", agents.length, "agents");
+    }
+  } catch(e){ console.log("Erreur chargement Supabase:", e); }
+}
+
+// Sauvegarder un agent dans Supabase
+async function saveAgentToSupabase(agent){
+  if(!supabaseEnabled || (!isAdmin && !isWriter)) return;
+  try {
+    await SB.upsert("lao_agents", agent, "matr");
+  } catch(e){ console.log("Erreur sauvegarde Supabase:", e); }
+}
+
+// Mode Admin
+function toggleAdmin(){
+  if(isAdmin){
+    // Déconnexion
+    isAdmin = false;
+    setReadOnly();
+    document.getElementById("btnAdmin").textContent = "\uD83D\uDD12 Admin";
+    showSaveStatus("Mode lecture seule");
+  } else {
+    document.getElementById("adminPwd").value="";
+    document.getElementById("adminErr").style.display="none";
+    document.getElementById("mAdmin").classList.add("on");
+    setTimeout(function(){document.getElementById("adminPwd").focus();},100);
+  }
+}
+
+function closeAdmin(){document.getElementById("mAdmin").classList.remove("on");}
+
+
+
+document.addEventListener("keydown", function(e){
+  if(e.key==="Enter" && document.getElementById("mAdmin").classList.contains("on")) checkAdmin();
+});
+if(document.getElementById("mAdmin")){
+  document.getElementById("mAdmin").addEventListener("click",function(e){
+    if(e.target===document.getElementById("mAdmin"))closeAdmin();
+  });
+}
+
+function setReadOnly(){
+  var _ml=document.getElementById("modeLabel");if(_ml)_ml.textContent = "\uD83D\uDD12 LECTURE SEULE";
+  if(_ml)_ml.style.background = "#B71C1C";
+  // Désactiver les interactions
+  document.querySelectorAll("td.ck").forEach(function(td){td.style.pointerEvents="none";td.style.cursor="default";});
+  document.querySelectorAll("td.dt").forEach(function(td){td.style.pointerEvents="none";td.style.cursor="default";});
+  document.querySelectorAll("td[style*='cursor:pointer']").forEach(function(td){td.style.pointerEvents="none";});
+}
+
+function setWriteMode(){
+  var _ml=document.getElementById("modeLabel");if(_ml)_ml.textContent = "\u270F\uFE0F ECRITURE";
+  if(_ml)_ml.style.background = "#1B5E20";
+  document.querySelectorAll("td.ck").forEach(function(td){td.style.pointerEvents="";td.style.cursor="pointer";});
+  document.querySelectorAll("td.dt").forEach(function(td){td.style.pointerEvents="";td.style.cursor="pointer";});
+}
+
+// Surcharger saveData pour aussi sauver dans Supabase
+var _origSaveData = saveData;
+
+
+
+
+
+
+// Au démarrage : mode lecture seule si Supabase activé
+// Mode lecture desactive au demarrage
+
+// ============================================================
+// GESTION UTILISATEURS
+// ============================================================
+
+// Créer un compte utilisateur
+async function createUser(){
+  var nom = document.getElementById("uNom").value.trim().toUpperCase();
+  var prenom = document.getElementById("uPrenom").value.trim();
+  var pwd = document.getElementById("uPwd").value;
+  var pwd2 = document.getElementById("uPwd2").value;
+  var err = document.getElementById("uErr");
+
+  if(!nom||!prenom||!pwd){err.textContent="Tous les champs sont obligatoires.";err.style.display="block";return;}
+  if(pwd!==pwd2){err.textContent="Les mots de passe ne correspondent pas.";err.style.display="block";return;}
+  if(pwd.length<4){err.textContent="Mot de passe trop court (4 caractères minimum).";err.style.display="block";return;}
+
+  if(!supabaseEnabled){alert("Supabase non disponible en local. Utilisez GitHub Pages.");return;}
+  try {
+    var check = await SB.get("lao_users", "nom=eq."+nom+"&prenom=eq."+prenom);
+    if(check && check.length>0){err.textContent="Ce compte existe déjà.";err.style.display="block";return;}
+
+    await SB.post("lao_users", {nom:nom,prenom:prenom,mot_de_passe:pwd,actif:false});
+    document.getElementById("mCreateUser").classList.remove("on");
+    alert("Compte créé ! L'administrateur doit l'activer avant que vous puissiez vous connecter.");
+  } catch(e){
+    err.textContent="Erreur: "+e.message;err.style.display="block";
+  }
+}
+
+// Connexion utilisateur écriture
+async function loginUser(){
+  var nom = document.getElementById("lNom").value.trim().toUpperCase();
+  var prenom = document.getElementById("lPrenom").value.trim();
+  var pwd = document.getElementById("lPwd").value;
+  var err = document.getElementById("lErr");
+
+  if(!nom||!prenom||!pwd){err.textContent="Remplissez tous les champs.";err.style.display="block";return;}
+
+  if(!supabaseEnabled){alert("Supabase non disponible en local. Utilisez GitHub Pages.");return;}
+  try {
+    var res = await SB.get("lao_users", "nom=eq."+nom+"&prenom=eq."+prenom+"&mot_de_passe=eq."+pwd);
+    if(!res||res.length===0){err.textContent="Identifiants incorrects.";err.style.display="block";return;}
+    var userData=res[0];
+    if(!userData.actif){err.textContent="Votre compte n'est pas encore activé par l'administrateur.";err.style.display="block";return;}
+
+    // Connexion OK
+    isAdmin = false;
+    isWriter = userData.role === 'ecriture';
+    if(isWriter){
+      setWriteMode();
+    } else {
+      setReadOnly();
+    }
+    document.getElementById("mLoginUser").classList.remove("on");
+    var _ml=document.getElementById("modeLabel");if(_ml)_ml.textContent = "\u270F\uFE0F " + res.data.prenom + " " + res.data.nom;
+    showSaveStatus("Connecté en mode écriture");
+  } catch(e){
+    err.textContent="Erreur connexion.";err.style.display="block";
+  }
+}
+
+// Ouvrir gestion utilisateurs (admin seulement)
+async function openUsers(){
+  if(!isAdmin) return;
+  document.getElementById("mUsers").classList.add("on");
+  loadUsers();
+}
+
+async function loadUsers(){
+  var list = document.getElementById("usersList");
+  if(!supabaseEnabled){
+    list.innerHTML="<p style='color:#B71C1C;font-size:12px'>Supabase non disponible en local.<br>Ouvrez la LAO depuis GitHub Pages pour accéder à la gestion des utilisateurs.</p>";
+    return;
+  }
+  list.innerHTML = "<p style='font-size:11px;color:#999'>Chargement...</p>";
+  try {
+    var res = await SB.get("lao_users", "order=nom");
+    if(!res||res.length===0){
+      list.innerHTML="<p style='font-size:11px;color:#999'>Aucun utilisateur enregistré.</p>";
+      return;
+    }
+    list.innerHTML = res.map(function(u){
+      return '<div style="display:flex;align-items:center;gap:8px;padding:8px;border-bottom:1px solid #ECEFF1;font-size:12px">'+
+        '<span style="flex:1;font-weight:600">'+u.nom+' '+u.prenom+'</span>'+
+        '<span style="font-size:10px;color:#999">'+new Date(u.created_at).toLocaleDateString('fr-FR')+'</span>'+
+        '<span style="padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:'+(u.actif?"#C8E6C9":"#FFCDD2")+';color:'+(u.actif?"#1B5E20":"#B71C1C")+'">'+(u.actif?"Actif":"En attente")+'</span>'+
+        (u.actif
+          ? '<button onclick="deactivateUser('+u.id+')" style="padding:3px 8px;font-size:10px;background:#FFCDD2;color:#B71C1C;border:none;border-radius:4px;cursor:pointer">Désactiver</button>'
+          : '<button onclick="activateUser('+u.id+')" style="padding:3px 8px;font-size:10px;background:#C8E6C9;color:#1B5E20;border:none;border-radius:4px;cursor:pointer">Activer</button>')+
+        '<button onclick="resetPassword('+u.id+')" style="padding:3px 8px;font-size:10px;background:#E3F2FD;color:#1565C0;border:none;border-radius:4px;cursor:pointer">Reset pwd</button>'+
+        '<button onclick="deleteUser('+u.id+')" style="padding:3px 8px;font-size:10px;background:#FFCDD2;color:#B71C1C;border:none;border-radius:4px;cursor:pointer">&#x1F5D1;</button>'+
+        '</div>';
+    }).join('');
+  } catch(e){ list.innerHTML="<p style='color:red'>Erreur: "+e.message+"</p>"; }
+}
+
+async function activateUser(id){
+  await SB.patch("lao_users", "id=eq."+id, {actif:true});
+  loadUsers();
+}
+async function deactivateUser(id){
+  await SB.patch("lao_users", "id=eq."+id, {actif:false});
+  loadUsers();
+}
+async function resetPassword(id){
+  var newPwd = prompt("Nouveau mot de passe :");
+  if(!newPwd) return;
+  await SB.patch("lao_users", "id=eq."+id, {mot_de_passe:newPwd});
+  alert("Mot de passe réinitialisé !");
+  loadUsers();
+}
+async function deleteUser(id){
+  if(!confirm("Supprimer cet utilisateur ?")) return;
+  await SB.delete("lao_users", "id=eq."+id);
+  loadUsers();
+}
+
+async function setRole(id, role){
+  await SB.patch("lao_users", "id=eq."+id, {role:role});
+  loadUsers();
+}
+
+// Afficher bouton gestion users quand admin connecté
+var _origSetWriteMode = setWriteMode;
+var isWriter = false;
+
+// Modifier toggleAdmin pour afficher le bouton users
+var _origCheckAdmin = checkAdmin;
+
+</script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Segoe UI,Arial,sans-serif;font-size:11px;background:#ECEFF1}
+.bar{position:sticky;top:0;z-index:100;background:linear-gradient(135deg,#1A237E 0%,#1565C0 50%,#0277BD 100%);color:#fff;display:flex;align-items:center;gap:8px;padding:6px 12px;box-shadow:0 3px 8px rgba(0,0,0,.4);border-bottom:2px solid #42A5F5}
+.bar h1{font-size:13px;font-weight:700;flex:1;color:#FFFFFF;text-shadow:0 1px 2px rgba(0,0,0,.3);letter-spacing:.3px}
+.bar button{background:#1976D2;color:#FFFFFF;border:1px solid #42A5F5;padding:5px 11px;border-radius:4px;font-size:11px;font-weight:700;cursor:pointer;text-shadow:0 1px 1px rgba(0,0,0,.2)}
+.bar button:hover{background:#1565C0;border-color:#90CAF9}
+.bar .gr{background:#2E7D32;color:#fff;border:1px solid #66BB6A}
+.bar .gr:hover{background:#1B5E20}
+.bar input[type=text]{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.5);border-radius:4px;padding:4px 8px;color:#FFFFFF;font-size:11px;width:150px}
+.bar input::placeholder{color:rgba(255,255,255,.8)}
+.st{background:#263238;color:#fff;padding:3px 10px;display:flex;gap:14px;font-size:10px;align-items:center}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:3px}
+.wrap{overflow:auto;height:calc(100vh - 44px)}
+table{border-collapse:collapse;background:#fff}
+th,td{border:1px solid #CFD8DC;padding:2px 4px;white-space:nowrap;text-align:center}
+.gi{background:linear-gradient(180deg,#263238 0%,#1A252F 100%);color:#ECEFF1;font-weight:700}.gl{background:linear-gradient(180deg,#1565C0 0%,#0D47A1 100%);color:#E3F2FD;font-weight:700}.glo{background:linear-gradient(180deg,#6A1B9A 0%,#4A148C 100%);color:#F3E5F5;font-weight:700}.gr2{background:linear-gradient(180deg,#2E7D32 0%,#1B5E20 100%);color:#E8F5E9;font-weight:700}.gn{background:linear-gradient(180deg,#00695C 0%,#004D40 100%);color:#E0F2F1;font-weight:700}
+.rg th{color:#FFFFFF!important;font-weight:700;font-size:11px;padding:5px 6px;letter-spacing:.5px;text-shadow:0 1px 3px rgba(0,0,0,.5)}
+.rg th:nth-child(1){background:linear-gradient(180deg,#455A64 0%,#37474F 100%)!important}
+.rg th:nth-child(2){background:linear-gradient(180deg,#1976D2 0%,#0D47A1 100%)!important}
+.rg th:nth-child(3){background:linear-gradient(180deg,#7B1FA2 0%,#4A148C 100%)!important}
+.rg th:nth-child(4){background:linear-gradient(180deg,#388E3C 0%,#1B5E20 100%)!important}
+.rg th:nth-child(5){background:linear-gradient(180deg,#00796B 0%,#004D40 100%)!important}
+.rt td{background:linear-gradient(90deg,#0D1B2A 0%,#1A2744 50%,#0D1B2A 100%);color:#FFD54F!important;font-weight:700;font-size:13px;padding:8px;letter-spacing:.5px;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.rd td{background:#FFF9C4;color:#F57F17;font-weight:700;font-size:9px}
+.rd .lb{text-align:right;font-style:italic}
+.rd select{background:#FFF9C4;border:2px solid #F57F17;color:#F57F17;font-weight:700;font-size:9px;border-radius:3px;cursor:pointer}
+.rh th{background:#fff;color:#333;font-weight:700;font-size:8px;padding:2px 3px;line-height:1.3}
+.hi{background:linear-gradient(180deg,#37474F 0%,#263238 100%)!important;color:#ECEFF1!important;text-shadow:0 1px 2px rgba(0,0,0,.4)}.hl{background:linear-gradient(180deg,#1976D2 0%,#0D47A1 100%)!important;color:#E3F2FD!important;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.hlo{background:linear-gradient(180deg,#7B1FA2 0%,#4A148C 100%)!important;color:#F3E5F5!important;text-shadow:0 1px 2px rgba(0,0,0,.4)}.hr{background:linear-gradient(180deg,#388E3C 0%,#1B5E20 100%)!important;color:#E8F5E9!important;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.hn{background:linear-gradient(180deg,#00796B 0%,#004D40 100%)!important;color:#E0F2F1!important;text-shadow:0 1px 2px rgba(0,0,0,.4)}.hd{background:linear-gradient(180deg,#0288D1 0%,#01579B 100%)!important;color:#E1F5FE!important;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+
+td.nm{text-align:left;min-width:90px;padding-left:8px!important;font-weight:600;color:#1A252F}td.pn{text-align:left;min-width:110px;padding-left:8px!important;color:#37474F}
+tr.dr td:nth-child(1),tr.dr td:nth-child(2),tr.dr td:nth-child(3),tr.dr td:nth-child(4),tr.dr td:nth-child(5),tr.dr td:nth-child(6){background:#ECEFF1}
+tr.dr td:nth-child(7),tr.dr td:nth-child(8),tr.dr td:nth-child(9),tr.dr td:nth-child(10),tr.dr td:nth-child(11),tr.dr td:nth-child(12),tr.dr td:nth-child(13),tr.dr td:nth-child(14){background:#E3F2FD}
+tr.dr td:nth-child(15),tr.dr td:nth-child(16),tr.dr td:nth-child(17),tr.dr td:nth-child(18),tr.dr td:nth-child(19),tr.dr td:nth-child(20),tr.dr td:nth-child(21),tr.dr td:nth-child(22),tr.dr td:nth-child(23),tr.dr td:nth-child(24){background:#F3E5F5}
+tr.dr td:nth-child(25),tr.dr td:nth-child(26),tr.dr td:nth-child(27){background:#E8F5E9}
+tr.dr td:nth-child(28),tr.dr td:nth-child(29){background:#E0F2F1}
+tr.dr:hover td{background:#FFF9C4!important}
+td.ck{min-width:28px;cursor:pointer;font-weight:700;font-size:12px}
+td.dt{min-width:83px;cursor:pointer;font-size:10px}
+td.V{background:#C8E6C9!important;color:#1B5E20!important;font-weight:700}
+td.X{background:#FFCDD2!important;color:#B71C1C!important;font-weight:700}
+td.DR{background:#FFCDD2!important;color:#B71C1C!important;font-weight:700}
+td.DO{background:#FFE0B2!important;color:#E65100!important;font-weight:700}
+td.DV{background:#C8E6C9!important;color:#1B5E20!important;font-weight:700}
+td.D0{background:#F5F5F5!important;color:#444!important}
+td:nth-child(1),th:nth-child(1){position:sticky;left:0;z-index:2;background:#F5F5F5}
+td:nth-child(2),th:nth-child(2){position:sticky;left:45px;z-index:2;background:#F5F5F5}
+td:nth-child(3),th:nth-child(3){position:sticky;left:80px;z-index:2;background:#F5F5F5}
+.ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:999;align-items:center;justify-content:center}
+.ov.on{display:flex}
+.mo{background:#fff;border-radius:10px;padding:18px;min-width:280px;box-shadow:0 8px 30px rgba(0,0,0,.3)}
+.mo h3{font-size:12px;color:#333;margin-bottom:10px}
+.mo input[type=date]{width:100%;padding:6px;font-size:13px;border:2px solid #1565C0;border-radius:5px;margin-bottom:10px}
+.mb{display:flex;gap:8px;justify-content:flex-end}
+.mb button{padding:5px 12px;border:none;border-radius:5px;font-size:11px;font-weight:700;cursor:pointer}
+.bok{background:#1565C0;color:#fff}.bcn{background:#ECEFF1;color:#555}.bcl{background:#FFCDD2;color:#B71C1C}
+.ma{min-width:380px}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.fg label{font-size:10px;color:#666;display:block;margin-bottom:2px}
+.fg input,.fg select{width:100%;padding:5px 7px;border:1px solid #CFD8DC;border-radius:4px;font-size:11px}
+.tip{background:#E3F2FD;border-radius:5px;padding:7px 9px;margin-bottom:10px;font-size:10px;color:#1565C0}
+.er{color:#B71C1C;font-size:10px;margin-bottom:5px;display:none}
+</style>
+</head>
+<body>
+<div class="bar">
+  <h1>&#x1F692; LAO CONDUITE 2026</h1>
+  <input type="text" id="srch" placeholder="Rechercher..." oninput="applyFilters()">
+  <select id="fGrade" onchange="applyFilters()" style="padding:4px 6px;border-radius:4px;font-size:11px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff">
+    <option value="">Tous grades</option>
+  </select>
+  <select id="fStatut" onchange="applyFilters()" style="padding:4px 6px;border-radius:4px;font-size:11px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff">
+    <option value="">Tous statuts</option>
+  </select>
+  <select id="fTri" onchange="applyFilters()" style="padding:4px 6px;border-radius:4px;font-size:11px;border:1px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff">
+    <option value="nom">Tri: Nom</option>
+    <option value="matr">Tri: Matricule</option>
+    <option value="grade">Tri: Grade</option>
+    <option value="statut">Tri: Statut</option>
+  </select>
+  <button onclick="toggleFiltres()" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.4)">&#x1F50D; Filtres engins</button>
+  <button onclick="resetFilters()" style="background:rgba(255,255,255,.2);color:#fff;border:1px solid rgba(255,255,255,.4)">&#x2715; Reset</button>
+  <button onclick="saveData()" style="background:rgba(100,200,100,.3);color:#fff;border:1px solid rgba(100,200,100,.4)">&#x1F4BE; Sauvegarder</button>
+  <button onclick="document.getElementById('mLoginUser').classList.add('on')" style="background:rgba(21,101,192,.5);color:#fff;border:1px solid rgba(255,255,255,.4)">&#x1F513; Connexion</button>
+  <button id="btnAdmin" onclick="toggleAdmin()" style="background:rgba(255,165,0,.3);color:#fff;border:1px solid rgba(255,165,0,.5)">&#x1F512; Admin</button>
+  <button id="btnUsers" onclick="openUsers()" style="display:none;background:rgba(230,81,0,.5);color:#fff;border:1px solid rgba(255,165,0,.4)">&#x1F465; Utilisateurs</button>
+  <button onclick="exportCSV()" style="background:#0F9D58;color:#fff;border:1px solid #0F9D58">&#x1F4CA; Google Sheets</button>
+  <button onclick="exportXLSX()">&#x2B07; Excel</button>
+  <button onclick="exportWord()" style="background:#1B5E20;color:#fff;border:1px solid #4CAF50">&#x2B07; Word</button>
+  <button onclick="exportJSON()" style="background:#FF6F00;color:#fff;border:1px solid #FFA000">&#x2B07; Donnees</button>
+  <button onclick="document.getElementById('fi').click()">&#x2B06; Importer</button>
+  <input type="file" id="fi" accept=".xlsx" style="display:none" onchange="importFile(event)">
+  <button class="gr" onclick="openAdd()">+ Agent</button>
+</div>
+<div class="st" id="st" style="display:flex;align-items:center">
+  <span id="modeLabel" style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:#B71C1C;color:#fff">&#x1F512; LECTURE SEULE</span>
+  <span id="saveStatus" style="margin-left:8px;font-size:10px;color:#80CBC4;opacity:0;transition:opacity .5s"></span>
+</div>
+<div id="panFiltres" style="display:none;background:#37474F;padding:6px 12px;display:none;flex-wrap:wrap;gap:6px;align-items:center;border-bottom:2px solid #263238">
+  <style>
+    .fsel{padding:3px 6px;border-radius:4px;font-size:10px;border:1px solid #546E7A;background:#455A64;color:#ECEFF1;cursor:pointer}
+    .fsel option{background:#455A64;color:#ECEFF1}
+    .flbl{font-size:10px;color:#B0BEC5;font-weight:700;margin-right:2px}
+    .fgrp{display:flex;align-items:center;gap:3px;background:rgba(0,0,0,.2);padding:3px 7px;border-radius:4px}
+  </style>
+  <!-- LÉGER -->
+  <div class="fgrp" style="border-left:3px solid #1976D2">
+    <span class="flbl">VL HU</span><select class="fsel" id="f_vl_hu" onchange="applyFilters()"><option value="">-</option><option value="V">V</option><option value="X">X</option></select>
+    <span class="flbl">VL VTUL</span><select class="fsel" id="f_vl_vtul" onchange="applyFilters()"><option value="">-</option><option value="V">V</option><option value="X">X</option></select>
+    <span class="flbl">VLM</span><select class="fsel" id="f_vlm" onchange="applyFilters()"><option value="">-</option><option value="V">V</option><option value="X">X</option></select>
+    <span class="flbl">VLTT</span><select class="fsel" id="f_vltt" onchange="applyFilters()"><option value="">-</option><option value="V">V</option><option value="X">X</option></select>
+    <span class="flbl">VLSMTT</span><select class="fsel" id="f_vlsmtt" onchange="applyFilters()"><option value="">-</option><option value="V">V</option><option value="X">X</option></select>
+    <span class="flbl">VPSI</span><select class="fsel" id="f_vpsi" onchange="applyFilters()"><option value="">-</option><option value="V">V</option><option value="X">X</option></select>
+  </div>
+  <!-- LOURD -->
+  <div class="fgrp" style="border-left:3px solid #7B1FA2">
+    <span class="flbl">FPT</span><select class="fsel" id="f_fpt" onchange="applyFilters()"><option value="">-</option><option value="V">V</option><option value="X">X</option></select>
+    <span class="flbl">EPS</span><select class="fsel" id="f_eps" onchange="applyFilters()"><option value="">-</option><option value="V">V</option><option value="X">X</option></select>
+    <span class="flbl">CCFM</span><select class="fsel" id="f_ccfm" onchange="applyFilters()"><option value="">-</option><option value="V">V</option><option value="X">X</option></select>
+    <span class="flbl">CCFS</span><select class="fsel" id="f_ccfs" onchange="applyFilters()"><option value="">-</option><option value="V">V</option><option value="X">X</option></select>
+    <span class="flbl">VPCE</span><select class="fsel" id="f_vpce" onchange="applyFilters()"><option value="">-</option><option value="V">V</option><option value="X">X</option></select>
+  </div>
+  <!-- REMORQUE -->
+  <div class="fgrp" style="border-left:3px solid #388E3C">
+    <span class="flbl">RESPE</span><select class="fsel" id="f_respe" onchange="applyFilters()"><option value="">-</option><option value="V">V</option><option value="X">X</option></select>
+    <span class="flbl">REM BLS</span><select class="fsel" id="f_rem_bls" onchange="applyFilters()"><option value="">-</option><option value="V">V</option><option value="X">X</option></select>
+    <span class="flbl">REM BRS</span><select class="fsel" id="f_rem_brs" onchange="applyFilters()"><option value="">-</option><option value="V">V</option><option value="X">X</option></select>
+  </div>
+  <!-- NAUTIQUE -->
+  <div class="fgrp" style="border-left:3px solid #00796B">
+    <span class="flbl">BLS</span><select class="fsel" id="f_bls" onchange="applyFilters()"><option value="">-</option><option value="V">V</option><option value="X">X</option></select>
+    <span class="flbl">BRS</span><select class="fsel" id="f_brs" onchange="applyFilters()"><option value="">-</option><option value="V">V</option><option value="X">X</option></select>
+  </div>
+  <span id="nbResultats" style="font-size:10px;color:#90A4AE;margin-left:8px"></span>
+</div>
+<div class="wrap">
+<table id="tbl"><thead>
+<tr class="rt"><td colspan="29">LISTE D'APTITUDE OP&Eacute;RATIONNELLE &mdash; CONDUITE D'ENGINS &nbsp;|&nbsp; Centre de Secours &nbsp;|&nbsp; 2026</td></tr>
+<tr class="rg">
+  <th colspan="6" class="gi">IDENTIFICATION</th>
+  <th colspan="8" class="gl">GROUPE L&Eacute;GER</th>
+  <th colspan="10" class="glo">GROUPE LOURD</th>
+  <th colspan="3" class="gr2">GROUPE REMORQUE</th>
+  <th colspan="2" class="gn">GROUPE NAUTIQUE</th>
+</tr>
+<tr class="rd">
+  <td class="lb" colspan="5">Dur&eacute;e validit&eacute; :</td>
+  <td><select id="dp" onchange="setD('permis',this.value)"></select></td>
+  <td colspan="3"></td>
+  <td><select id="dv" onchange="setD('vlm',this.value)"></select></td>
+  <td></td>
+  <td><select id="dt" onchange="setD('vltt',this.value)"></select></td>
+  <td colspan="2"></td><td></td>
+  <td><select id="df" onchange="setD('fpt',this.value)"></select></td>
+  <td></td>
+  <td><select id="de" onchange="setD('eps',this.value)"></select></td>
+  <td></td>
+  <td><select id="dc" onchange="setD('ccfm',this.value)"></select></td>
+  <td></td>
+  <td><select id="ds" onchange="setD('ccfs',this.value)"></select></td>
+  <td></td>
+  <td><select id="dq" onchange="setD('vpce',this.value)"></select></td>
+  <td colspan="5"></td>
+</tr>
+<tr class="rh">
+  <th class="hi">Matr.</th><th class="hi">Grade</th><th class="hi">Nom</th>
+  <th class="hi">Pr&eacute;nom</th><th class="hi">Statut</th><th class="hi">Val.Permis</th>
+  <th class="hl">VL Hors Urg.</th><th class="hl">VL VTUL VSAV</th><th class="hl">VLM</th>
+  <th class="hd">Date FMPA VLM</th><th class="hl">VLTT</th><th class="hd">Date FMPA VLTT</th>
+  <th class="hl">VLSMTT</th><th class="hl">VPSI</th>
+  <th class="hlo">FPT/FPTL VSR</th><th class="hd">Date FMPA FPT</th>
+  <th class="hlo">EPS</th><th class="hd">Date FMPA EPS</th>
+  <th class="hlo">CCFM</th><th class="hd">Date FMPA CCFM</th>
+  <th class="hlo">CCFS</th><th class="hd">Date FMPA CCFS</th>
+  <th class="hlo">VPCE</th><th class="hd">Date FMPA VPCE</th>
+  <th class="hr">RESPE</th><th class="hr">REM BLS</th><th class="hr">REM BRS</th>
+  <th class="hn">BLS</th><th class="hn">BRS</th>
+</tr>
+</thead><tbody id="tb"></tbody></table>
+</div>
+
+<div class="ov" id="mD"><div class="mo">
+  <h3 id="mT">Date</h3>
+  <input type="date" id="mDv">
+  <div class="mb">
+    <button class="bcl" onclick="clrD()">Effacer</button>
+    <button class="bcn" onclick="closeMD()">Annuler</button>
+    <button class="bok" onclick="okD()">Valider</button>
+  </div>
+</div></div>
+
+<div class="ov" id="mA"><div class="mo ma">
+  <h3 style="font-size:13px;margin-bottom:12px;color:#1565C0">+ Ajouter un agent</h3>
+  <div class="fg">
+    <div><label>Matricule</label><input id="aM" placeholder="Ex: 12345"></div>
+    <div><label>Grade</label><select id="aG"><option value="">--</option><option>SAP</option><option>CAP</option><option>ADJ</option><option>ADC</option><option>LTN</option><option>CNE</option></select></div>
+    <div><label>Nom *</label><input id="aN" placeholder="NOM" style="text-transform:uppercase"></div>
+    <div><label>Prenom *</label><input id="aP" placeholder="Prenom"></div>
+    <div><label>Statut</label><select id="aSt"><option value="">--</option><option>SPV</option><option>SPP</option><option>SPPV</option></select></div>
+    <div><label>Validite Permis</label><input type="date" id="aPr"></div>
+  </div>
+  <div class="tip">Les qualifications V/X et dates FMPA seront saisies dans le tableau.</div>
+  <div class="er" id="aE"></div>
+  <div class="mb">
+    <button class="bcn" onclick="closeMAdd()">Annuler</button>
+    <button class="bok" onclick="okAdd()">+ Ajouter</button>
+  </div>
+</div></div>
+
+<script>
+var AGENTS = [{"matr": "14889", "grade": "SAP", "nom": "ALBANO", "prenom": "Jérémy", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "14890", "grade": "CAP", "nom": "ALBANO", "prenom": "Lucas", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "17023", "grade": "SAP", "nom": "ALBANO", "prenom": "Tony", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "25191", "grade": "SAP", "nom": "ALBOUY", "prenom": "Cloé", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "", "grade": "SAP", "nom": "ANDRE", "prenom": "Yann", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "27350", "grade": "SAP", "nom": "ARAGON", "prenom": "Joris", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "11417", "grade": "SAP", "nom": "ARAMO", "prenom": "Benoit", "statut": "SPP", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "05/02/2026", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "05/02/2026", "ccfm": "V", "fmpa_ccfm": "05/02/2026", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "14584", "grade": "SGT", "nom": "ASTIC", "prenom": "Nicolas", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "24889", "grade": "SAP", "nom": "ASTIER", "prenom": "Anicet", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "17039", "grade": "SAP", "nom": "ATTARD", "prenom": "Brice", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "23/01/2024", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "19762", "grade": "SAP", "nom": "AUBERT", "prenom": "Francesca", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "06/01/2024", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "27145", "grade": "SAP", "nom": "BANDIERRA", "prenom": "Flavio", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "21065", "grade": "CAP", "nom": "BARTOLI", "prenom": "Paul", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "14/06/2023", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "10903", "grade": "CCH", "nom": "BASCUNANA", "prenom": "Francois", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "23/03/2021", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "27938", "grade": "", "nom": "BATAILLOU", "prenom": "Amandine", "statut": "", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "12642", "grade": "CAP", "nom": "BATTISTI", "prenom": "Julien", "statut": "SPV/SPP", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "02/06/2023", "ccfm": "V", "fmpa_ccfm": "02/06/2023", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "V", "brs": "V"}, {"matr": "17706", "grade": "", "nom": "BENARD", "prenom": "Sébastien", "statut": "", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "05/02/2026", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "V", "fmpa_ccfm": "05/02/2026", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "16971", "grade": "CAP", "nom": "BERARD", "prenom": "Kévin", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "5991", "grade": "SCH", "nom": "BERENGER", "prenom": "Francis", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "V", "fmpa_ccfm": "04/02/2025", "ccfs": "V", "fmpa_ccfs": "05/02/2024", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "13351", "grade": "SGT", "nom": "BERENGER", "prenom": "Guillaume", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "05/02/2027", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "25433", "grade": "CCH", "nom": "BERTHE", "prenom": "Rémy", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "25176", "grade": "SAP", "nom": "BIAU", "prenom": "Christophe", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "22908", "grade": "SAP", "nom": "BINOIS-PASTOR", "prenom": "Alicia", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "17924", "grade": "CCH", "nom": "BLANC", "prenom": "Julien", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "27/03/2018", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "02/06/2023", "ccfm": "V", "fmpa_ccfm": "04/02/2025", "ccfs": "V", "fmpa_ccfs": "02/06/2023", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "24890", "grade": "SAP", "nom": "BONATO", "prenom": "Jonathan", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "7996", "grade": "SCH", "nom": "BONFILS", "prenom": "Fabien", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "02/06/2023", "ccfm": "V", "fmpa_ccfm": "04/02/2025", "ccfs": "V", "fmpa_ccfs": "05/02/2024", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "18715", "grade": "CAL", "nom": "BOUCHOUCHA", "prenom": "Frédéric", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "06/08/2021", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "02/06/2023", "ccfm": "V", "fmpa_ccfm": "04/02/2025", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "V", "brs": "V"}, {"matr": "17927", "grade": "ADC", "nom": "BOUTILLIER", "prenom": "Yannick", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "02/06/2023", "ccfm": "V", "fmpa_ccfm": "04/02/2025", "ccfs": "V", "fmpa_ccfs": "02/06/2023", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "V", "brs": "V"}, {"matr": "22455", "grade": "SAP", "nom": "BRUN-MALHERBE", "prenom": "Jeremy", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "13614", "grade": "SAP", "nom": "CANO", "prenom": "Thomas", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "15/10/2019", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "7990", "grade": "CCH", "nom": "CANONNE", "prenom": "Christophe", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "05/02/2024", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "V", "fmpa_ccfm": "02/06/2023", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "24802", "grade": "SAP", "nom": "CARLES", "prenom": "Gayane", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "27348", "grade": "SAP", "nom": "CARTOUX", "prenom": "Florent", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "12753", "grade": "ADJ", "nom": "CAYOL", "prenom": "Gaetan", "statut": "SPV/SPP", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "02/06/2023", "ccfm": "V", "fmpa_ccfm": "05/02/2024", "ccfs": "V", "fmpa_ccfs": "02/06/2023", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "21359", "grade": "SAP", "nom": "CHAMPAUZAS- DUPARAY", "prenom": "Axel", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "14279", "grade": "CAL", "nom": "CHASSAING", "prenom": "Pierre", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "02/07/2020", "vltt": "V", "fmpa_vltt": "05/02/2026", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "05/02/2026", "ccfm": "V", "fmpa_ccfm": "05/02/2026", "ccfs": "V", "fmpa_ccfs": "05/02/2026", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "V", "brs": "X"}, {"matr": "17526", "grade": "", "nom": "CHOUDAR", "prenom": "Mathieu", "statut": "", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "05/02/2024", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "02/06/2023", "ccfm": "V", "fmpa_ccfm": "02/06/2023", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "V"}, {"matr": "23810", "grade": "", "nom": "CLAIR-BONAIME", "prenom": "Estelle", "statut": "", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "9351", "grade": "SCH", "nom": "COLUNGO", "prenom": "Alexandre", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "05/02/2026", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "05/02/2026", "ccfm": "V", "fmpa_ccfm": "05/02/2026", "ccfs": "V", "fmpa_ccfs": "05/02/2026", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "18018", "grade": "SAP", "nom": "COLUNGO", "prenom": "Yoni", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "06/01/2024", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "1213", "grade": "ADC", "nom": "CORCE", "prenom": "Jean Marie", "statut": "SPV", "permis": "17/05/2021", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "02/06/2023", "ccfm": "V", "fmpa_ccfm": "02/06/2023", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "V"}, {"matr": "27709", "grade": "", "nom": "CORONADO", "prenom": "Joris", "statut": "", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "27096", "grade": "SAP", "nom": "COUTANCIN", "prenom": "Sébastien", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "1271", "grade": "SCH", "nom": "CRAPIZ", "prenom": "Christophe", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "02/06/2023", "ccfm": "V", "fmpa_ccfm": "05/02/2024", "ccfs": "V", "fmpa_ccfs": "04/02/2025", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "22458", "grade": "SAP", "nom": "CRAPIZ", "prenom": "Clément", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "13520", "grade": "CAP", "nom": "CRIVELLO", "prenom": "Nicolas", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "28/09/2021", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "27176", "grade": "SAP", "nom": "CUENIN", "prenom": "Théo", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "2103", "grade": "ADC", "nom": "DE TAUZIA", "prenom": "Emmanuel", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "V", "fmpa_ccfm": "05/02/2024", "ccfs": "V", "fmpa_ccfs": "02/06/2023", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "V", "brs": "V"}, {"matr": "22442", "grade": "SAP", "nom": "DECHERCHI", "prenom": "Elie", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "19775", "grade": "", "nom": "DELBE", "prenom": "Quentin", "statut": "", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "V", "fmpa_ccfm": "02/06/2023", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "V", "brs": "X"}, {"matr": "10623", "grade": "SCH", "nom": "DELEAU", "prenom": "Romain", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "05/02/2026", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "05/02/2026", "ccfm": "V", "fmpa_ccfm": "05/02/2026", "ccfs": "V", "fmpa_ccfs": "05/02/2026", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "13096", "grade": "C/C", "nom": "DELEYE", "prenom": "Doriane", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "15/10/2019", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "20688", "grade": "ADJ", "nom": "DELLE MONACHE", "prenom": "Michel", "statut": "SPV/BMP", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "05/02/2027", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "05/02/2027", "ccfm": "V", "fmpa_ccfm": "05/02/2027", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "814", "grade": "ADC", "nom": "DEMELAS", "prenom": "Didier", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "02/06/2023", "ccfm": "V", "fmpa_ccfm": "02/06/2023", "ccfs": "V", "fmpa_ccfs": "02/06/2023", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "21147", "grade": "SAP", "nom": "DENIS-MOTTE", "prenom": "Rémi", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "16248", "grade": "SGT", "nom": "DEUMIE", "prenom": "Julien", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "05/02/2026", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "05/02/2026", "ccfm": "V", "fmpa_ccfm": "05/02/2026", "ccfs": "V", "fmpa_ccfs": "05/02/2026", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "12752", "grade": "SGT", "nom": "DIAS", "prenom": "Rémy", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "04/02/2025", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "02/06/2023", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "13646", "grade": "S/C", "nom": "DIMAYUGA", "prenom": "Stéphane", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "05/04/2021", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "02/06/2023", "ccfm": "V", "fmpa_ccfm": "04/02/2025", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "25672", "grade": "SAP", "nom": "DJAIFRI", "prenom": "Naella", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "22461", "grade": "SAP", "nom": "DUA", "prenom": "Terence", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "19142", "grade": "CAP", "nom": "DUMON", "prenom": "Nicolas", "statut": "SPP/SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "05/02/2026", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "2583", "grade": "ADC", "nom": "DUPONT", "prenom": "Rémy", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "26652", "grade": "C/C", "nom": "EL BAH", "prenom": "Rayanne", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "27259", "grade": "C/C", "nom": "EL BAH", "prenom": "Reslin", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "V"}, {"matr": "17954", "grade": "SAP", "nom": "ENGELS", "prenom": "Thomas", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "13521", "grade": "CAP", "nom": "EVAIN", "prenom": "Gael", "statut": "SPV/SPP", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "15/10/2019", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "V", "fmpa_ccfm": "02/06/2023", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "23404", "grade": "SAP", "nom": "FARINA", "prenom": "Kérian", "statut": "JSP/SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "1221", "grade": "ADC", "nom": "FENEYROL", "prenom": "Jacques", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "V", "fmpa_ccfm": "02/06/2023", "ccfs": "V", "fmpa_ccfs": "02/06/2023", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "V"}, {"matr": "1248", "grade": "", "nom": "FERRERO", "prenom": "Yves", "statut": "", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "V", "fmpa_ccfm": "02/06/2023", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "1241", "grade": "SAP", "nom": "FERRI", "prenom": "Corinne", "statut": "SPV/PATS", "permis": "", "vl_hu": "V", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "19642", "grade": "SAP", "nom": "FERRO", "prenom": "Luna", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "28049", "grade": "", "nom": "FLECHERO", "prenom": "François", "statut": "", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "18471", "grade": "SAP", "nom": "FOURNIER", "prenom": "Morgan", "statut": "SPP/SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "05/02/2026", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "05/02/2026", "ccfm": "V", "fmpa_ccfm": "05/02/2026", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "26088", "grade": "SAP", "nom": "GABERAND", "prenom": "Yona", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "26609", "grade": "SAP", "nom": "GALLARATI", "prenom": "Nicolas", "statut": "SPV/BMP", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "V", "fmpa_ccfm": "02/06/2023", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "16551", "grade": "CAL", "nom": "GARCIA", "prenom": "Raphaël", "statut": "SPV/SPP", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "V", "fmpa_ccfm": "04/02/2025", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "20622", "grade": "CAP", "nom": "GARCIA", "prenom": "Sébastien", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "04/02/2025", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "28070", "grade": "", "nom": "GAUTHIER", "prenom": "Hélène", "statut": "", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "14989", "grade": "", "nom": "GAUTIER", "prenom": "Christopher", "statut": "", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "V"}, {"matr": "10149", "grade": "SGH", "nom": "GIANA", "prenom": "Christophe", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "26/05/2020", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "02/06/2023", "ccfm": "V", "fmpa_ccfm": "02/06/2023", "ccfs": "V", "fmpa_ccfs": "02/06/2023", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "V", "brs": "V"}, {"matr": "610", "grade": "ADC", "nom": "GIMENEZ", "prenom": "Olivier", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "V", "fmpa_ccfm": "02/06/2023", "ccfs": "V", "fmpa_ccfs": "02/06/2023", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "V", "brs": "V"}, {"matr": "18644", "grade": "SAP", "nom": "GIQUEL", "prenom": "Hugo", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "25175", "grade": "SAP", "nom": "GOBERT", "prenom": "Nathan", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "15277", "grade": "CAP", "nom": "GRAFFAGNINO", "prenom": "Théo", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "7975", "grade": "ADC", "nom": "GROUILLER", "prenom": "Benoit", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "V", "fmpa_ccfm": "04/02/2025", "ccfs": "V", "fmpa_ccfs": "05/02/2024", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "V", "brs": "V"}, {"matr": "25399", "grade": "", "nom": "GUILLAUME", "prenom": "Théo", "statut": "", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "1268", "grade": "ADC", "nom": "GUILLAUME", "prenom": "Yves", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "04/02/2025", "ccfm": "V", "fmpa_ccfm": "04/02/2025", "ccfs": "V", "fmpa_ccfs": "04/02/2025", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "20628", "grade": "CAP", "nom": "HACHE", "prenom": "Sébastien", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "25435", "grade": "SAP", "nom": "HALIN", "prenom": "Mickael", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "19645", "grade": "SAP", "nom": "HASSEN", "prenom": "Lou", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "17087", "grade": "CAP", "nom": "HENIQUE", "prenom": "Gauvain", "statut": "SPV/SPP", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "05/02/2027", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "1255", "grade": "ADC", "nom": "HERRERO", "prenom": "Hervé", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "V", "fmpa_ccfm": "04/02/2025", "ccfs": "V", "fmpa_ccfs": "04/02/2025", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "14897", "grade": "SAP", "nom": "HOAREAU", "prenom": "Guillaume", "statut": "SPV/BMP", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "10911", "grade": "SGT", "nom": "JANIEC-GROBERT", "prenom": "Emilie", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "05/02/2026", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "05/02/2026", "ccfm": "V", "fmpa_ccfm": "05/02/2026", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "V", "brs": "V"}, {"matr": "19646", "grade": "SAP", "nom": "JOSEPH-AUGUSTE", "prenom": "Mathis", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "22464", "grade": "SAP", "nom": "JOUD", "prenom": "Alexandre", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "23411", "grade": "SAP", "nom": "JULIEN", "prenom": "Alexandre", "statut": "JSP/SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "17869", "grade": "SAP", "nom": "JUNGERS", "prenom": "Camille", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "17041", "grade": "C/C", "nom": "KALFAYAN", "prenom": "Yoan", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "23/03/2021", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "28071", "grade": "", "nom": "KUCI", "prenom": "Ianis", "statut": "", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "14666", "grade": "SGT", "nom": "LADERACH", "prenom": "Benjamin", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "06/01/2024", "vltt": "V", "fmpa_vltt": "05/02/2026", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "V", "fmpa_ccfm": "05/02/2026", "ccfs": "V", "fmpa_ccfs": "05/02/2026", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "19788", "grade": "SGT", "nom": "LAFITTE", "prenom": "Anthony", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "06/08/2018", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "05/02/2024", "ccfm": "V", "fmpa_ccfm": "02/06/2023", "ccfs": "V", "fmpa_ccfs": "02/06/2023", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "V", "brs": "X"}, {"matr": "17024", "grade": "SAP", "nom": "LANDI", "prenom": "Mathéo", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "17042", "grade": "CAL", "nom": "LANGOIROUX", "prenom": "Arnaud", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "11/03/2021", "vltt": "V", "fmpa_vltt": "05/02/2024", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "12751", "grade": "S/C", "nom": "LANGOIROUX", "prenom": "Florian", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "21/06/2016", "vltt": "V", "fmpa_vltt": "05/02/2026", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "05/02/2026", "ccfm": "V", "fmpa_ccfm": "05/02/2026", "ccfs": "V", "fmpa_ccfs": "05/02/2026", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "V"}, {"matr": "17186", "grade": "", "nom": "LARTIGUES", "prenom": "Alicia", "statut": "", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "19821", "grade": "C/C", "nom": "LE BRUN", "prenom": "Vincent", "statut": "SPP", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "18/01/2022", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "04/02/2025", "ccfm": "V", "fmpa_ccfm": "02/06/2023", "ccfs": "V", "fmpa_ccfs": "02/06/2023", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "V"}, {"matr": "15340", "grade": "CAL", "nom": "LEVY", "prenom": "Jordan", "statut": "SPV/SPP", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "V", "fmpa_ccfm": "02/06/2023", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "23807", "grade": "SAP", "nom": "LIENARD", "prenom": "Louis", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "05/10/2025", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "3292", "grade": "LTN", "nom": "LOPES", "prenom": "Jean-Christophe", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "05/02/2024", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "02/06/2023", "ccfm": "V", "fmpa_ccfm": "02/06/2023", "ccfs": "V", "fmpa_ccfs": "04/02/2025", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "V"}, {"matr": "26181", "grade": "SAP", "nom": "LOSEILLE", "prenom": "Valentine", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "20458", "grade": "SAP", "nom": "LOUAT", "prenom": "Medhi", "statut": "JSP/SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "19647", "grade": "SAP", "nom": "MACCHI", "prenom": "Alexi", "statut": "SPV/BMP", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "27870", "grade": "", "nom": "MADDALONE", "prenom": "Grégory", "statut": "", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "19735", "grade": "ADJ", "nom": "MARCHELLI", "prenom": "Eric", "statut": "SPV/BMP", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "05/02/2027", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "05/02/2027", "ccfm": "V", "fmpa_ccfm": "05/02/2027", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "19649", "grade": "SAP", "nom": "MARCHIS", "prenom": "Lukas", "statut": "SPV/BMP", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "22852", "grade": "CAP", "nom": "MARONGIU-MARCELLI", "prenom": "Angelina", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "17025", "grade": "SAP", "nom": "MARTIN", "prenom": "Thilbaut", "statut": "SPV/BMP", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "14/06/2023", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "V", "fmpa_ccfm": "02/06/2023", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "25473", "grade": "ADC", "nom": "MARTINEZ", "prenom": "Christophe", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "06/01/2024", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "23975", "grade": "SAP", "nom": "MARTINEZ", "prenom": "Raphael", "statut": "JSP/SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "23808", "grade": "SAP", "nom": "MATHEVON", "prenom": "Bertrand", "statut": "SPV/SPP", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "05/02/2027", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "27707", "grade": "", "nom": "MAUPETIT", "prenom": "Germain", "statut": "", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "V"}, {"matr": "23413", "grade": "SAP", "nom": "MEDINA", "prenom": "Lucas", "statut": "JSP/SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "27347", "grade": "SAP", "nom": "MEERPOEL", "prenom": "Léna", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "14343", "grade": "SGH", "nom": "MERITAN", "prenom": "Marion", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "16497", "grade": "SGT", "nom": "MERLE", "prenom": "Bastien", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "05/02/2026", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "05/02/2026", "ccfm": "V", "fmpa_ccfm": "05/02/2026", "ccfs": "V", "fmpa_ccfs": "05/02/2026", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "18689", "grade": "SAP", "nom": "MERLO", "prenom": "Vito", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "22204", "grade": "SAP", "nom": "MICHELINE", "prenom": "Claire", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "16556", "grade": "SGT", "nom": "MILLE", "prenom": "Florian", "statut": "SPV/BMP", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "05/02/2026", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "05/02/2026", "ccfm": "V", "fmpa_ccfm": "05/02/2026", "ccfs": "V", "fmpa_ccfs": "05/02/2026", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "16903", "grade": "SGT", "nom": "MLECZAK", "prenom": "Mathieu", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "04/02/2025", "ccfm": "V", "fmpa_ccfm": "02/06/2023", "ccfs": "V", "fmpa_ccfs": "04/02/2025", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "V", "brs": "X"}, {"matr": "24808", "grade": "SAP", "nom": "MONTI", "prenom": "Angeline", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "15768", "grade": "CAP", "nom": "MORELLO", "prenom": "Gabin", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "26/03/2024", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "18827", "grade": "CAL", "nom": "NAERT", "prenom": "Pierre", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "19/01/2021", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "12749", "grade": "SGT", "nom": "NAPOLETANO", "prenom": "Alexis", "statut": "SPV/SPP", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "05/02/2026", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "05/02/2026", "ccfm": "V", "fmpa_ccfm": "05/02/2026", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "12748", "grade": "CCH", "nom": "NAPOLETANO", "prenom": "Florent", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "V", "fmpa_ccfm": "04/02/2025", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "14108", "grade": "SAP", "nom": "NEMES", "prenom": "Laurianne", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "15/10/2019", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "21733", "grade": "", "nom": "NERINI", "prenom": "Clément", "statut": "", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "05/02/2027", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "14055", "grade": "", "nom": "NICOLAI", "prenom": "Maxime", "statut": "", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "11694", "grade": "ADJ", "nom": "NIZIER", "prenom": "Géraldine", "statut": "SPV/SPP", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "28/02/2017", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "02/06/2023", "ccfm": "V", "fmpa_ccfm": "05/02/2024", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "19651", "grade": "SAP", "nom": "ODEN", "prenom": "Arthur", "statut": "SPV/BMP", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "05/10/2025", "vltt": "V", "fmpa_vltt": "05/02/2026", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "20596", "grade": "SAP", "nom": "OHEIX", "prenom": "Soizic", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "27714", "grade": "SAP", "nom": "PALUS", "prenom": "Pierre", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "6829", "grade": "SCH", "nom": "PAPPOLA", "prenom": "Benjamin", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "19/01/2021", "vltt": "V", "fmpa_vltt": "05/02/2026", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "05/02/2026", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "24197", "grade": "SAP", "nom": "PAQUET-BIANCHINI", "prenom": "Cécile", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "20450", "grade": "SAP", "nom": "PASTORELLI", "prenom": "Tony", "statut": "JSP/SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "14994", "grade": "SCH", "nom": "PECQUEUX", "prenom": "Julie", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "V", "fmpa_ccfm": "02/06/2023", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "10910", "grade": "ADJ", "nom": "PEIRO", "prenom": "Robert", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "V", "fmpa_ccfm": "02/06/2023", "ccfs": "V", "fmpa_ccfs": "02/06/2023", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "20451", "grade": "SAP", "nom": "PENGE", "prenom": "Mattéo", "statut": "JSP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "5990", "grade": "", "nom": "PEPITONE", "prenom": "Jean-Christophe", "statut": "", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "02/06/2023", "ccfm": "V", "fmpa_ccfm": "05/02/2024", "ccfs": "V", "fmpa_ccfs": "02/06/2023", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "26428", "grade": "SAP", "nom": "PERET", "prenom": "Malo", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "05/02/2026", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "6154", "grade": "ADJ", "nom": "PEREZ", "prenom": "Alexandre", "statut": "SPV/SPP", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "02/06/2023", "ccfm": "V", "fmpa_ccfm": "02/06/2023", "ccfs": "V", "fmpa_ccfs": "04/02/2025", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "9315", "grade": "SCH", "nom": "PHILIPPON", "prenom": "Nicolas", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "V", "fmpa_ccfm": "02/06/2023", "ccfs": "V", "fmpa_ccfs": "04/02/2025", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "V", "brs": "V"}, {"matr": "23684", "grade": "CCH", "nom": "PICARDAT", "prenom": "Grégoire", "statut": "SPV/BMP", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "15/06/2023", "vltt": "V", "fmpa_vltt": "04/02/2025", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "18357", "grade": "SGT", "nom": "PICOU", "prenom": "Lucie", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "19/01/2021", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "02/06/2023", "ccfm": "V", "fmpa_ccfm": "04/02/2025", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "13332", "grade": "SCH", "nom": "PICUS", "prenom": "François", "statut": "SPV/SPP", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "15/10/2019", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "22/04/2019", "ccfs": "X", "fmpa_ccfs": "07/02/2021", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "18695", "grade": "SGT", "nom": "PIGNATEL", "prenom": "Florian", "statut": "SPV/SPP", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "02/06/2023", "ccfm": "V", "fmpa_ccfm": "02/06/2023", "ccfs": "V", "fmpa_ccfs": "04/02/2025", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "611", "grade": "ADC", "nom": "PILONE", "prenom": "Alexandre", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "04/02/2025", "ccfm": "V", "fmpa_ccfm": "04/02/2025", "ccfs": "V", "fmpa_ccfs": "02/06/2023", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "V"}, {"matr": "24807", "grade": "SAP", "nom": "PILONE", "prenom": "Mae", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "21259", "grade": "CAL", "nom": "PIPET", "prenom": "Fridoline", "statut": "SPP", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "06/01/2024", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "1266", "grade": "ADC", "nom": "PORTALES", "prenom": "Gilles", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "V", "fmpa_ccfm": "05/02/2024", "ccfs": "V", "fmpa_ccfs": "04/02/2025", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "18829", "grade": "CAL", "nom": "POULIN", "prenom": "Frédéric", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "06/01/2024", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "20146", "grade": "C/C", "nom": "POUS", "prenom": "Mathieu", "statut": "SPP", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "06/07/2019", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "19786", "grade": "SGT", "nom": "PURSON", "prenom": "Loïc", "statut": "SPP", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "02/06/2023", "ccfm": "V", "fmpa_ccfm": "05/02/2024", "ccfs": "V", "fmpa_ccfs": "02/06/2023", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "V", "brs": "V"}, {"matr": "24199", "grade": "SAP", "nom": "REHEL", "prenom": "Ludovic", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "22467", "grade": "SAP", "nom": "RENACCO", "prenom": "Lucas", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "24156", "grade": "", "nom": "REPINGON", "prenom": "Maximillien", "statut": "", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "64", "grade": "", "nom": "RICARD", "prenom": "Pascal", "statut": "", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "V", "fmpa_ccfm": "02/06/2023", "ccfs": "V", "fmpa_ccfs": "02/06/2023", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "17996", "grade": "SGT", "nom": "RIOU", "prenom": "Maxime", "statut": "SPV/BMP", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "02/06/2023", "ccfm": "V", "fmpa_ccfm": "02/06/2023", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "V", "brs": "V"}, {"matr": "25311", "grade": "SAP", "nom": "RIVIERE", "prenom": "Audrey", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "26089", "grade": "SAP", "nom": "ROUTIER-SCAPPUCCI", "prenom": "Coline", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "25499", "grade": "SAP", "nom": "SALERNO", "prenom": "Baptiste", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "9434", "grade": "C/C", "nom": "SALIGNON", "prenom": "Jérémy", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "21/02/2007", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "02/06/2023", "ccfm": "V", "fmpa_ccfm": "04/02/2025", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "19653", "grade": "SAP", "nom": "SALMI", "prenom": "Elyes", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "14155", "grade": "SGT", "nom": "SAMAT", "prenom": "Stéphane", "statut": "SPV/BMP", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "02/06/2023", "ccfm": "V", "fmpa_ccfm": "02/06/2023", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "26", "grade": "LTN", "nom": "SANZ", "prenom": "Patrick", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "3128", "grade": "SCH", "nom": "SCALIA", "prenom": "Olivier", "statut": "SPP", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "02/06/2023", "ccfm": "V", "fmpa_ccfm": "04/02/2025", "ccfs": "V", "fmpa_ccfs": "02/06/2023", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "V", "brs": "V"}, {"matr": "22469", "grade": "SAP", "nom": "SCARSI", "prenom": "Noah", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "6441", "grade": "CCH", "nom": "SERTIC", "prenom": "Alexis", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "02/06/2023", "ccfm": "V", "fmpa_ccfm": "02/06/2023", "ccfs": "V", "fmpa_ccfs": "04/02/2025", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "17077", "grade": "CAP", "nom": "SILVY", "prenom": "Alexandre", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "21711", "grade": "CAL", "nom": "STAHL", "prenom": "Enzo", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "04/02/2025", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "23418", "grade": "SAP", "nom": "STOLL", "prenom": "Lara", "statut": "JSP/SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "21368", "grade": "SAP", "nom": "TARI", "prenom": "Ryan", "statut": "SPV/BMP", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "05/02/2027", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "19410", "grade": "CAP", "nom": "TARI", "prenom": "Ylies", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "06/05/2020", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "13522", "grade": "SGT", "nom": "TARRINI", "prenom": "Sébastien", "statut": "SPV/SPP", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "02/06/2023", "ccfm": "V", "fmpa_ccfm": "02/06/2023", "ccfs": "V", "fmpa_ccfs": "05/02/2024", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "24918", "grade": "ADC", "nom": "THEVENET", "prenom": "Guy", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "26/03/2024", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "V", "brs": "V"}, {"matr": "20534", "grade": "SCH", "nom": "THOMAS", "prenom": "Jérémy", "statut": "SPV/BMP", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "05/02/2026", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "05/02/2026", "ccfm": "V", "fmpa_ccfm": "05/02/2026", "ccfs": "V", "fmpa_ccfs": "05/02/2026", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "11846", "grade": "SGT", "nom": "TREVES", "prenom": "Jérémy", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "05/02/2026", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "05/02/2026", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "20454", "grade": "SAP", "nom": "TURCO", "prenom": "Enzo", "statut": "SPV", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "12747", "grade": "ADJ", "nom": "VANDAMME", "prenom": "Alexis", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "02/06/2023", "ccfm": "V", "fmpa_ccfm": "02/06/2023", "ccfs": "V", "fmpa_ccfs": "02/06/2023", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "7751", "grade": "SGT", "nom": "VANNINI", "prenom": "Fabrice", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "02/06/2023", "ccfm": "V", "fmpa_ccfm": "05/02/2024", "ccfs": "V", "fmpa_ccfs": "02/06/2023", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "11192", "grade": "ADC", "nom": "VEAUTE", "prenom": "Yannick", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "02/06/2023", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "V", "fmpa_ccfm": "02/06/2023", "ccfs": "V", "fmpa_ccfs": "04/02/2025", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "V", "brs": "V"}, {"matr": "7992", "grade": "SGT", "nom": "VENTRE", "prenom": "Emmanuel", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "V", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "05/02/2026", "vlsmtt": "V", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "V", "fmpa_ccfm": "05/02/2026", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "23982", "grade": "", "nom": "VIAL", "prenom": "Florian", "statut": "", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "", "vltt": "V", "fmpa_vltt": "05/02/2026", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "05/02/2026", "ccfm": "V", "fmpa_ccfm": "05/02/2026", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "24888", "grade": "SAP", "nom": "VIGNAUX", "prenom": "Julien", "statut": "SPV", "permis": "", "vl_hu": "V", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "28019", "grade": "", "nom": "WADJINNY", "prenom": "DAVID", "statut": "", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "", "grade": "", "nom": "ZOUAOUI", "prenom": "Khalid", "statut": "", "permis": "", "vl_hu": "X", "vl_vtul": "X", "vlm": "X", "fmpa_vlm": "", "vltt": "X", "fmpa_vltt": "", "vlsmtt": "X", "vpsi": "X", "fpt": "X", "fmpa_fpt": "", "eps": "X", "fmpa_eps": "", "ccfm": "X", "fmpa_ccfm": "", "ccfs": "X", "fmpa_ccfs": "", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}, {"matr": "1229", "grade": "ADC", "nom": "ZUBANOVIC", "prenom": "Alain", "statut": "SPP/SPV", "permis": "", "vl_hu": "V", "vl_vtul": "V", "vlm": "X", "fmpa_vlm": "15/10/2019", "vltt": "V", "fmpa_vltt": "05/02/2024", "vlsmtt": "X", "vpsi": "V", "fpt": "X", "fmpa_fpt": "", "eps": "V", "fmpa_eps": "04/02/2025", "ccfm": "V", "fmpa_ccfm": "05/02/2024", "ccfs": "V", "fmpa_ccfs": "02/06/2023", "vpce": "X", "fmpa_vpce": "", "respe": "X", "rem_bls": "X", "rem_brs": "X", "bls": "X", "brs": "X"}];
+var DUREES_RAW = {"6": 1825, "10": 1095, "12": 1095, "16": 1095, "18": 1095, "20": 1095, "22": 1095, "24": 1095};
+var DAYS = {"1 an":365,"2 ans":730,"3 ans":1095,"4 ans":1460,"5 ans":1825};
+var DSTR = {365:"1 an",730:"2 ans",1095:"3 ans",1460:"4 ans",1825:"5 ans"};
+var OPTS = ["1 an","2 ans","3 ans","4 ans","5 ans"];
+var agents = AGENTS.slice();
+var durees = {
+  permis: DUREES_RAW[6]||1825, vlm: DUREES_RAW[10]||1095,
+  vltt: DUREES_RAW[12]||1095, fpt: DUREES_RAW[16]||1095,
+  eps: DUREES_RAW[18]||1095, ccfm: DUREES_RAW[20]||1095,
+  ccfs: DUREES_RAW[22]||1095, vpce: DUREES_RAW[24]||1095
+};
+var Ddur = {permis:"permis",fmpa_vlm:"vlm",fmpa_vltt:"vltt",fmpa_fpt:"fpt",
+  fmpa_eps:"eps",fmpa_ccfm:"ccfm",fmpa_ccfs:"ccfs",fmpa_vpce:"vpce"};
+var DENG = {fmpa_vlm:"vlm",fmpa_vltt:"vltt",fmpa_fpt:"fpt",
+  fmpa_eps:"eps",fmpa_ccfm:"ccfm",fmpa_ccfs:"ccfs",fmpa_vpce:"vpce"};
+var filtered = [];
+var mCell=null, mField=null, mIdx=null;
+
+window.onload = function() {
+  // Charger depuis localStorage si disponible
+  try {
+    var saved = localStorage.getItem("lao_agents");
+    var savedDurees = localStorage.getItem("lao_durees");
+    if(saved) {
+      agents = JSON.parse(saved);
+      console.log("Donnees chargees depuis localStorage: "+agents.length+" agents");
+    }
+    if(savedDurees) {
+      var d = JSON.parse(savedDurees);
+      Object.keys(d).forEach(function(k){ durees[k]=d[k]; });
+    }
+  } catch(e) { console.log("Erreur chargement localStorage:", e); }
+
+  filtered = agents.map(function(_,i){return i;});
+  var selMap = {dp:"permis",dv:"vlm",dt:"vltt",df:"fpt",de:"eps",dc:"ccfm",ds:"ccfs",dq:"vpce"};
+  Object.keys(selMap).forEach(function(id) {
+    var k = selMap[id];
+    var sel = document.getElementById(id);
+    OPTS.forEach(function(o) {
+      var opt = document.createElement("option");
+      opt.value = o; opt.textContent = o;
+      if (DAYS[o] === durees[k]) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  });
+  populateFilters();
+  applyFilters();
+  updateStats();
+  showSaveStatus("Donnees chargees");
+};
+
+function dcls(str, dk) {
+  if (!str) return "D0";
+  var p = str.split("/");
+  var d = new Date(+p[2], +p[1]-1, +p[0]);
+  var exp = new Date(d.getTime() + durees[dk]*86400000);
+  var now = new Date();
+  if (exp < now) return "DR";
+  if (exp < new Date(now.getTime()+180*86400000)) return "DO";
+  return "DV";
+}
+
+function render() {
+  var tb = document.getElementById("tb");
+  tb.innerHTML = "";
+  filtered.forEach(function(i) {
+    var a = agents[i];
+    var tr = document.createElement("tr");
+    tr.className = "dr"; tr.dataset.i = i;
+    function T(v,cls){var td=document.createElement("td");td.textContent=v||"";if(cls)td.className=cls;tr.appendChild(td);return td;}
+    function Tedit(v,idx,field,cls){
+      var td=document.createElement("td");
+      td.textContent=v||"";
+      if(cls)td.className=cls;
+      
+      td.style.cursor="pointer";
+      td.ondblclick=function(){openEditCell(td,idx,field);};
+      tr.appendChild(td);
+      return td;
+    }
+    function C(v,f){var td=document.createElement("td");var val=v||"X";
+      td.className="ck "+val;td.textContent=val;td.dataset.field=f;td.dataset.i=i;
+      td.onclick=function(){tog(td,i,f);};tr.appendChild(td);}
+    function D(v,f,dk){var td=document.createElement("td");
+      td.className="dt "+dcls(v,dk);td.textContent=v||"";
+      td.dataset.field=f;td.dataset.i=i;
+      td.onclick=function(){openMD(td,i,f);};tr.appendChild(td);}
+    Tedit(a.matr,i,"matr","center");Tedit(a.grade,i,"grade","center");
+    Tedit(a.nom,i,"nom","nm left");Tedit(a.prenom,i,"prenom","pn left");Tedit(a.statut,i,"statut","center");
+    D(a.permis,"permis","permis");
+    C(a.vl_hu,"vl_hu");C(a.vl_vtul,"vl_vtul");C(a.vlm,"vlm");
+    D(a.fmpa_vlm,"fmpa_vlm","vlm");
+    C(a.vltt,"vltt");D(a.fmpa_vltt,"fmpa_vltt","vltt");
+    C(a.vlsmtt,"vlsmtt");C(a.vpsi,"vpsi");
+    C(a.fpt,"fpt");D(a.fmpa_fpt,"fmpa_fpt","fpt");
+    C(a.eps,"eps");D(a.fmpa_eps,"fmpa_eps","eps");
+    C(a.ccfm,"ccfm");D(a.fmpa_ccfm,"fmpa_ccfm","ccfm");
+    C(a.ccfs,"ccfs");D(a.fmpa_ccfs,"fmpa_ccfs","ccfs");
+    C(a.vpce,"vpce");D(a.fmpa_vpce,"fmpa_vpce","vpce");
+    C(a.respe,"respe");C(a.rem_bls,"rem_bls");C(a.rem_brs,"rem_brs");
+    C(a.bls,"bls");C(a.brs,"brs");
+    tb.appendChild(tr);
+  });
+}
+
+function tog(td,i,f){
+  var n=agents[i][f]==="V"?"X":"V";
+  agents[i][f]=n;td.textContent=n;td.className="ck "+n;
+  recalc(i);updateStats();saveData();
+}
+function recalc(i){
+  var a=agents[i];
+  a.vlsmtt=(a.vlm==="V"&&a.vltt==="V")?"V":"X";
+  a.vpsi=a.vltt==="V"?"V":"X";
+  var tr=document.querySelector("tr[data-i='"+i+"']");if(!tr)return;
+  ["vlsmtt","vpsi"].forEach(function(f){
+    var td=tr.querySelector("td[data-field='"+f+"']");
+    if(td){td.textContent=a[f];td.className="ck "+a[f];}
+  });
+}
+
+function openMD(cell,i,f){
+  mCell=cell;mField=f;mIdx=i;
+  var labels={permis:"Val. Permis (date fin)",fmpa_vlm:"Fin validite VLM",fmpa_vltt:"Fin validite VLTT",
+    fmpa_fpt:"Fin validite FPT",fmpa_eps:"Fin validite EPS",fmpa_ccfm:"Fin validite CCFM",
+    fmpa_ccfs:"Fin validite CCFS",fmpa_vpce:"Fin validite VPCE"};
+  document.getElementById("mT").textContent="Saisir date FIN : "+(labels[f]||f);
+  var v=agents[i][f];var inp=document.getElementById("mDv");
+  if(v){
+    // Afficher la date de FIN (date FMPA + duree) dans le champ
+    var dk2=Ddur[f]||"permis";
+    var jours2=durees[dk2]||1095;
+    var p=v.split("/");
+    var dFmpa2=new Date(+p[2],+p[1]-1,+p[0]);
+    var dFin2=new Date(dFmpa2.getTime()+jours2*86400000);
+    inp.value=dFin2.getFullYear()+"-"+String(dFin2.getMonth()+1).padStart(2,"0")+"-"+String(dFin2.getDate()).padStart(2,"0");
+  }else inp.value="";
+  document.getElementById("mD").classList.add("on");inp.focus();
+}
+function closeMD(){document.getElementById("mD").classList.remove("on");}
+function clrD(){
+  if(mIdx===null)return;
+  agents[mIdx][mField]="";mCell.textContent="";mCell.className="dt D0";
+  updEng(mIdx,mField,"");recalc(mIdx);updateStats();saveData();closeMD();
+}
+function okD(){
+  var v=document.getElementById("mDv").value;if(!v){closeMD();return;}
+  // La date saisie est la date de FIN de validite
+  // On calcule la date FMPA = date_fin - duree en jours
+  var dk=Ddur[mField]||"permis";
+  var jours=durees[dk]||1095;
+  var dFin=new Date(v);
+  var dFmpa=new Date(dFin.getTime()-jours*86400000);
+  var s=String(dFmpa.getDate()).padStart(2,"0")+"/"+String(dFmpa.getMonth()+1).padStart(2,"0")+"/"+dFmpa.getFullYear();
+  agents[mIdx][mField]=s;
+  mCell.textContent=s;mCell.className="dt "+dcls(s,dk);
+  updEng(mIdx,mField,s);recalc(mIdx);updateStats();saveData();closeMD();
+}
+document.addEventListener("keydown",function(e){
+  if(e.key==="Escape"){closeMD();closeMAdd();}
+  if(e.key==="Enter"&&document.getElementById("mD").classList.contains("on"))okD();
+});
+if(document.getElementById("mD")){
+  document.getElementById("mD").addEventListener("click",function(e){if(e.target===document.getElementById("mD"))closeMD();});
+}
+document.getElementById("mA").addEventListener("click",function(e){if(e.target===document.getElementById("mA"))closeMAdd();});
+
+function updEng(i,df,s){
+  var ef=DENG[df];if(!ef)return;
+  var v="X";
+  if(s){var p=s.split("/");var d=new Date(+p[2],+p[1]-1,+p[0]);
+    if(new Date(d.getTime()+durees[Ddur[df]]*86400000)>=new Date())v="V";}
+  agents[i][ef]=v;
+  var tr=document.querySelector("tr[data-i='"+i+"']");if(!tr)return;
+  var td=tr.querySelector("td[data-field='"+ef+"']");
+  if(td){td.textContent=v;td.className="ck "+v;}
+}
+
+function setD(k,str){
+  durees[k]=DAYS[str]||1095;
+  var fm={permis:"permis",vlm:"fmpa_vlm",vltt:"fmpa_vltt",fpt:"fmpa_fpt",
+    eps:"fmpa_eps",ccfm:"fmpa_ccfm",ccfs:"fmpa_ccfs",vpce:"fmpa_vpce"}[k];
+  document.querySelectorAll("td[data-field='"+fm+"']").forEach(function(td){
+    var i=+td.dataset.i;var s=agents[i][fm];
+    td.className="dt "+dcls(s,k);updEng(i,fm,s);recalc(i);
+  });
+  updateStats();saveData();
+}
+
+function doFilter(q){applyFilters();}
+
+var ENGIN_FIELDS=["vl_hu","vl_vtul","vlm","vltt","vlsmtt","vpsi",
+  "fpt","eps","ccfm","ccfs","vpce","respe","rem_bls","rem_brs","bls","brs"];
+
+function applyFilters(){
+  var q=document.getElementById("srch").value.toLowerCase().trim();
+  var fGrade=document.getElementById("fGrade").value;
+  var fStatut=document.getElementById("fStatut").value;
+  var fTri=document.getElementById("fTri").value;
+  // Debug
+  if(agents.length > 0 && filtered.length === 0) console.log("WARN: filtered vide! agents="+agents.length+" fGrade="+fGrade+" fStatut="+fStatut);
+
+  filtered=agents.reduce(function(a,ag,i){
+    if(q&&(ag.nom+ag.prenom+ag.matr+ag.grade).toLowerCase().indexOf(q)<0)return a;
+    if(fGrade&&ag.grade!==fGrade)return a;
+    if(fStatut&&ag.statut!==fStatut)return a;
+    // Filtres engins
+    for(var ei=0;ei<ENGIN_FIELDS.length;ei++){
+      var f=document.getElementById("f_"+ENGIN_FIELDS[ei]);
+      if(f&&f.value&&ag[ENGIN_FIELDS[ei]]!==f.value)return a;
+    }
+    a.push(i);return a;
+  },[]);
+
+  filtered.sort(function(a,b){
+    return (agents[a][fTri]||"").localeCompare(agents[b][fTri]||"");
+  });
+
+  // Mettre à jour le compteur
+  var nb=document.getElementById("nbResultats");
+  if(nb) nb.textContent=filtered.length+" agent(s) affiché(s)";
+
+  render();
+}
+
+function toggleFiltres(){
+  var p=document.getElementById("panFiltres");
+  p.style.display=p.style.display==="none"||p.style.display===""?"flex":"none";
+}
+
+function resetFilters(){
+  document.getElementById("srch").value="";
+  document.getElementById("fGrade").value="";
+  document.getElementById("fStatut").value="";
+  document.getElementById("fTri").value="nom";
+  ENGIN_FIELDS.forEach(function(f){
+    var el=document.getElementById("f_"+f);
+    if(el)el.value="";
+  });
+  applyFilters();
+}
+
+function populateFilters(){
+  var sg=document.getElementById("fGrade");
+  var ss=document.getElementById("fStatut");
+  // Ne remplir que si vide (1 = seulement l'option "Tous")
+  if(sg.options.length > 1 && ss.options.length > 1) return;
+  var grades=new Set(),statuts=new Set();
+  agents.forEach(function(a){
+    if(a.grade)grades.add(a.grade);
+    if(a.statut)statuts.add(a.statut);
+  });
+  while(sg.options.length > 1) sg.remove(1);
+  Array.from(grades).sort().forEach(function(g){
+    var o=document.createElement("option");o.value=g;o.textContent=g;sg.appendChild(o);
+  });
+  while(ss.options.length > 1) ss.remove(1);
+  Array.from(statuts).sort().forEach(function(s){
+    var o=document.createElement("option");o.value=s;o.textContent=s;ss.appendChild(o);
+  });
+}
+
+function clearSave(){
+  if(!confirm("Effacer la sauvegarde locale et recharger les donnees initiales ?"))return;
+  localStorage.removeItem("lao_agents");
+  localStorage.removeItem("lao_durees");
+  location.reload();
+}
+
+
+
+function saveData(){
+  try {
+    localStorage.setItem("lao_agents", JSON.stringify(agents));
+    localStorage.setItem("lao_durees", JSON.stringify(durees));
+    showSaveStatus("Sauvegarde OK");
+  } catch(e) { console.log("Erreur localStorage:", e); }
+  if(supabaseEnabled && (isAdmin||isWriter)){
+    agents.forEach(function(a){ saveAgentToSupabase(a); });
+  }
+}
+
+function showSaveStatus(msg){
+  var el = document.getElementById("saveStatus");
+  if(!el) return;
+  el.textContent = "💾 " + msg;
+  el.style.opacity = "1";
+  clearTimeout(el._t);
+  el._t = setTimeout(function(){ el.style.opacity="0"; }, 2000);
+}
+
+function updateStats(){
+  var t=agents.length;
+  function V(k){return agents.filter(function(a){return a[k]==="V";}).length;}
+  document.getElementById("st").innerHTML=
+    "<span>Agents: "+t+"</span>"+
+    "<span><span class='dot' style='background:#4CAF50'></span>VLM V: "+V("vlm")+"</span>"+
+    "<span><span class='dot' style='background:#4CAF50'></span>VLTT V: "+V("vltt")+"</span>"+
+    "<span><span class='dot' style='background:#7B1FA2'></span>FPT V: "+V("fpt")+"</span>"+
+    "<span style='margin-left:auto;opacity:.5'>Cliquer V/X | Cliquer date</span>";
+}
+
+function openAdd(){
+  ["aM","aN","aP"].forEach(function(id){document.getElementById(id).value="";});
+  ["aG","aSt"].forEach(function(id){document.getElementById(id).value="";});
+  document.getElementById("aPr").value="";
+  document.getElementById("aE").style.display="none";
+  document.getElementById("mA").classList.add("on");
+  document.getElementById("aN").focus();
+}
+function closeMAdd(){document.getElementById("mA").classList.remove("on");}
+function okAdd(){
+  var nom=document.getElementById("aN").value.trim().toUpperCase();
+  var prenom=document.getElementById("aP").value.trim();
+  if(!nom||!prenom){
+    var e=document.getElementById("aE");e.textContent="Nom et Prenom obligatoires.";e.style.display="block";return;
+  }
+  var pr=document.getElementById("aPr").value;var ps="";
+  if(pr){var d=new Date(pr);ps=String(d.getDate()).padStart(2,"0")+"/"+String(d.getMonth()+1).padStart(2,"0")+"/"+d.getFullYear();}
+  var a={matr:document.getElementById("aM").value.trim(),
+    grade:document.getElementById("aG").value,
+    nom:nom,prenom:prenom,statut:document.getElementById("aSt").value,permis:ps,
+    vl_hu:"X",vl_vtul:"X",vlm:"X",fmpa_vlm:"",vltt:"X",fmpa_vltt:"",vlsmtt:"X",vpsi:"X",
+    fpt:"X",fmpa_fpt:"",eps:"X",fmpa_eps:"",ccfm:"X",fmpa_ccfm:"",ccfs:"X",fmpa_ccfs:"",
+    vpce:"X",fmpa_vpce:"",respe:"X",rem_bls:"X",rem_brs:"X",bls:"X",brs:"X"};
+  var idx=agents.length;
+  for(var i=0;i<agents.length;i++){if(agents[i].nom.localeCompare(nom)>0){idx=i;break;}}
+  agents.splice(idx,0,a);
+  filtered=agents.map(function(_,i){return i;});
+  render();updateStats();saveData();closeMAdd();
+  setTimeout(function(){
+    var rows=document.querySelectorAll("#tb tr.dr");
+    if(rows[idx]){rows[idx].scrollIntoView({behavior:"smooth",block:"center"});
+      rows[idx].style.outline="3px solid #1565C0";
+      setTimeout(function(){if(rows[idx])rows[idx].style.outline="";},2000);}
+  },100);
+}
+
+function importFile(e){
+  var f=e.target.files[0];if(!f)return;
+  var reader=new FileReader();
+  reader.onload=function(ev){
+    var wb=XLSX.read(ev.target.result,{type:"array",cellDates:false});
+    var ws=wb.Sheets[wb.SheetNames[0]];
+    var rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:true});
+    if(rows.length<2){alert("Fichier vide");return;}
+
+    // Mapping qualification -> champ fmpa (noms exacts du fichier)
+    var QUAL_MAP={
+      "COD_1":"fmpa_fpt",
+      "COD_GAV_T":"fmpa_vpce",
+      "COD_2PL":"fmpa_ccfm",
+      "COD_2VL":"fmpa_vltt",
+      "COD_S13":"fmpa_ccfs",
+      "HAB_CAMIVA":"fmpa_eps",
+      "FMPA HAB CAMIVA":"fmpa_eps",
+      "COD2 PL":"fmpa_ccfm",
+      "COD2 VL":"fmpa_vltt",
+      "COD S13":"fmpa_ccfs",
+      "HAB CAMIVA":"fmpa_eps"
+    };
+
+    var ENGIN_MAP={
+      fmpa_vlm:"vlm",fmpa_vltt:"vltt",fmpa_fpt:"fpt",
+      fmpa_eps:"eps",fmpa_ccfm:"ccfm",fmpa_ccfs:"ccfs",fmpa_vpce:"vpce"
+    };
+    var DDUR={
+      permis:"permis",fmpa_vlm:"vlm",fmpa_vltt:"vltt",fmpa_fpt:"fpt",
+      fmpa_eps:"eps",fmpa_ccfm:"ccfm",fmpa_ccfs:"ccfs",fmpa_vpce:"vpce"
+    };
+
+    // Convertir une valeur SheetJS en date JJ/MM/AAAA
+    function toDate(val){
+      if(!val&&val!==0)return null;
+      var d;
+      // Nombre serie Excel (ex: 46178)
+      if(typeof val==="number"){
+        // Excel date serial: jours depuis 01/01/1900
+        d=new Date(Math.round((val-25569)*86400000));
+      } else if(typeof val==="string"){
+        var s=val.trim();
+        if(!s)return null;
+        // JJ/MM/AAAA
+        var m1=s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+        if(m1){return s;}
+        // AAAA-MM-JJ
+        var m2=s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+        if(m2){d=new Date(+m2[1],+m2[2]-1,+m2[3]);}
+        else return null;
+      } else if(val instanceof Date){
+        d=val;
+      } else return null;
+      if(!d||isNaN(d.getTime()))return null;
+      return String(d.getUTCDate()).padStart(2,"0")+"/"+
+             String(d.getUTCMonth()+1).padStart(2,"0")+"/"+
+             d.getUTCFullYear();
+    }
+
+    function calcFmpa(dateFin, field){
+      var dk=DDUR[field]||"permis";
+      var jours=durees[dk]||1095;
+      var p=dateFin.split("/");
+      var ms=Date.UTC(+p[2],+p[1]-1,+p[0]);
+      var fmpaMs=ms-jours*86400000;
+      var fd=new Date(fmpaMs);
+      return String(fd.getUTCDate()).padStart(2,"0")+"/"+
+             String(fd.getUTCMonth()+1).padStart(2,"0")+"/"+
+             fd.getUTCFullYear();
+    }
+
+    function setDate(ag,field,dateFin){
+      var fmpa=calcFmpa(dateFin,field);
+      ag[field]=fmpa;
+      var ef=ENGIN_MAP[field];
+      if(ef){
+        var dk=DDUR[field]||"permis";
+        var p=fmpa.split("/");
+        var exp=new Date(Date.UTC(+p[2],+p[1]-1,+p[0])+durees[dk]*86400000);
+        ag[ef]=exp>=new Date()?"V":"X";
+      }
+    }
+
+    var n=0,skip=0;
+    // Detecter format COD : chercher "Qualification" dans n'importe quel header
+    var isCOD=false;
+    var qualCol=-1,matrCol=-1,dateCol=-1;
+    if(rows.length>0){
+      for(var hi=0;hi<rows[0].length;hi++){
+        var hv=String(rows[0][hi]||"").toLowerCase().trim();
+        if(hv.indexOf("qualif")>=0){isCOD=true;qualCol=hi;}
+        if(hv==="agent"||hv==="matricule"||hv==="matr"){matrCol=hi;}
+        if(hv.indexOf("date fin")>=0||hv.indexOf("fin ops")>=0){dateCol=hi;}
+      }
+      // Si pas trouve, defaults COD
+      if(isCOD){
+        if(matrCol<0)matrCol=0;
+        if(qualCol<0)qualCol=2;
+        if(dateCol<0)dateCol=3;
+      }
+    }
+
+    rows.slice(1).forEach(function(row){
+      var matr=String(row[isCOD?matrCol:0]||"").trim();
+      if(!matr)return;
+      var ag=null;
+      for(var i=0;i<agents.length;i++){
+        if(agents[i].matr===matr){ag=agents[i];break;}
+      }
+      if(!ag){skip++;return;}
+
+      if(isCOD){
+        var qual=String(row[qualCol]||"").trim().replace(/[;&]+$/,"").replace(/-\d+$/,"").trim();
+        var field=QUAL_MAP[qual];
+        if(!field){return;}
+        var dateFin=toDate(row[dateCol]);
+        if(!dateFin)return;
+        setDate(ag,field,dateFin);
+        recalc(agents.indexOf(ag));
+        n++;
+      } else {
+        var DATE_COLS={5:"permis",9:"fmpa_vlm",11:"fmpa_vltt",15:"fmpa_fpt",
+          17:"fmpa_eps",19:"fmpa_ccfm",21:"fmpa_ccfs",23:"fmpa_vpce"};
+        var updated=false;
+        Object.keys(DATE_COLS).forEach(function(ci){
+          var dateFin=toDate(row[+ci]);
+          if(!dateFin)return;
+          setDate(ag,DATE_COLS[ci],dateFin);
+          updated=true;
+        });
+        if(updated){recalc(agents.indexOf(ag));n++;}
+      }
+    });
+
+    render();updateStats();saveData();
+    var msg="Import OK : "+n+" agent(s) mis a jour";
+    if(skip>0)msg+="\n("+skip+" matricule(s) non trouves dans la LAO)";
+    alert(msg);
+  };
+  reader.readAsArrayBuffer(f);e.target.value="";
+}
+
+function dStr(k){return DSTR[durees[k]]||"3 ans";}
+
+function exportXLSX(){
+  function S(bg,fg,bold,sz,ha,wrap){
+    return{fill:{patternType:"solid",fgColor:{rgb:bg}},
+      font:{color:{rgb:fg},bold:!!bold,sz:sz||10,name:"Calibri"},
+      alignment:{horizontal:ha||"center",vertical:"center",wrapText:!!wrap},
+      border:{top:{style:"thin",color:{rgb:"B0BEC5"}},bottom:{style:"thin",color:{rgb:"B0BEC5"}},
+        left:{style:"thin",color:{rgb:"B0BEC5"}},right:{style:"thin",color:{rgb:"B0BEC5"}}}};}
+  var WB=XLSX.utils.book_new();
+  var wsData=[
+    ["LAO CONDUITE 2026 - Centre de Secours"],
+    ["IDENTIFICATION","","","","","","GROUPE LEGER","","","","","","","","GROUPE LOURD","","","","","","","","","","GROUPE REMORQUE","","","GROUPE NAUTIQUE",""],
+    ["Duree validite","","","","",dStr("permis"),"","","",dStr("vlm"),"",dStr("vltt"),"","","",dStr("fpt"),"",dStr("eps"),"",dStr("ccfm"),"",dStr("ccfs"),"",dStr("vpce"),"","","","",""],
+    ["Matr","Grade","Nom","Prenom","Statut","Val Permis","VL Hors Urg","VL VTUL VSAV","VLM","Date FMPA VLM","VLTT","Date FMPA VLTT","VLSMTT","VPSI","FPT VSR","Date FMPA FPT","EPS","Date FMPA EPS","CCFM","Date FMPA CCFM","CCFS","Date FMPA CCFS","VPCE","Date FMPA VPCE","RESPE","REM BLS","REM BRS","BLS","BRS"]
+  ];
+  agents.forEach(function(a){
+    wsData.push([a.matr,a.grade,a.nom,a.prenom,a.statut,a.permis,
+      a.vl_hu,a.vl_vtul,a.vlm,a.fmpa_vlm,a.vltt,a.fmpa_vltt,a.vlsmtt,a.vpsi,
+      a.fpt,a.fmpa_fpt,a.eps,a.fmpa_eps,a.ccfm,a.fmpa_ccfm,
+      a.ccfs,a.fmpa_ccfs,a.vpce,a.fmpa_vpce,
+      a.respe,a.rem_bls,a.rem_brs,a.bls,a.brs]);
+  });
+  var ws=XLSX.utils.aoa_to_sheet(wsData,{cellStyles:true});
+  ws["!cols"]=[{wch:7},{wch:6},{wch:16},{wch:13},{wch:8},{wch:12},{wch:7},{wch:13},{wch:13},{wch:12},{wch:7},{wch:12},{wch:7},{wch:13},{wch:13},{wch:12},{wch:7},{wch:12},{wch:7},{wch:12},{wch:7},{wch:12},{wch:7},{wch:12},{wch:7},{wch:13},{wch:13},{wch:13},{wch:13}];
+  ws["!rows"]=[{hpt:26},{hpt:20},{hpt:20},{hpt:46}];
+  agents.forEach(function(){ws["!rows"].push({hpt:15});});
+  ws["!merges"]=[
+    {s:{r:0,c:0},e:{r:0,c:28}},
+    {s:{r:1,c:0},e:{r:1,c:5}},{s:{r:1,c:6},e:{r:1,c:13}},{s:{r:1,c:14},e:{r:1,c:23}},
+    {s:{r:1,c:24},e:{r:1,c:26}},{s:{r:1,c:27},e:{r:1,c:28}},
+    {s:{r:2,c:0},e:{r:2,c:4}},{s:{r:2,c:6},e:{r:2,c:8}},{s:{r:2,c:12},e:{r:2,c:13}},
+    {s:{r:2,c:24},e:{r:2,c:26}},{s:{r:2,c:27},e:{r:2,c:28}}
+  ];
+  function sc(r,c,s){var ref=XLSX.utils.encode_cell({r:r,c:c});if(!ws[ref])ws[ref]={t:"s",v:""};ws[ref].s=s;}
+  for(var c=0;c<29;c++) sc(0,c,S("1A2744","FFD54F",true,13,"center",false));
+  var g2=[[0,5,"455A64","ECEFF1"],[6,13,"1976D2","E3F2FD"],[14,23,"7B1FA2","F3E5F5"],[24,26,"388E3C","E8F5E9"],[27,28,"00796B","E0F2F1"]];
+  g2.forEach(function(g){for(var c=g[0];c<=g[1];c++) sc(1,c,S(g[2],g[3],true,11,"center",false));});
+  for(var c=0;c<29;c++){
+    var isV=[5,9,11,15,17,19,21,23].indexOf(c)>=0;
+    sc(2,c,S("FFF9C4","F57F17",true,c===0?9:10,c===0?"right":"center",false));
+  }
+  var h4=[[0,5,"37474F","ECEFF1"],[6,8,"0D47A1","E3F2FD"],[9,9,"01579B","E1F5FE"],
+    [10,10,"0D47A1","E3F2FD"],[11,11,"01579B","E1F5FE"],[12,13,"0D47A1","E3F2FD"],
+    [14,14,"4A148C","F3E5F5"],[15,15,"01579B","E1F5FE"],[16,16,"4A148C","F3E5F5"],
+    [17,17,"01579B","E1F5FE"],[18,18,"4A148C","F3E5F5"],[19,19,"01579B","E1F5FE"],
+    [20,20,"4A148C","F3E5F5"],[21,21,"01579B","E1F5FE"],[22,22,"4A148C","F3E5F5"],
+    [23,23,"01579B","E1F5FE"],[24,26,"1B5E20","E8F5E9"],[27,28,"004D40","E0F2F1"]];
+  h4.forEach(function(h){for(var c=h[0];c<=h[1];c++) sc(3,c,S(h[2],h[3],true,8,"center",true));});
+  var CI=[6,7,8,10,12,13,14,15,17,19,21,23,24,25,26,27,28];
+  var DI={5:"permis",9:"vlm",11:"vltt",15:"fpt",17:"eps",19:"ccfm",21:"ccfs",23:"vpce"};
+  var GB=[[0,5,"ECEFF1"],[6,13,"E3F2FD"],[14,23,"F3E5F5"],[24,26,"E8F5E9"],[27,28,"E0F2F1"]];
+  function getBg(c){for(var i=0;i<GB.length;i++){if(c>=GB[i][0]&&c<=GB[i][1])return GB[i][2];}return "FFFFFF";}
+  function getDC(s,dk){
+    if(!s)return null;var p=s.split("/");var d=new Date(+p[2],+p[1]-1,+p[0]);
+    var exp=new Date(d.getTime()+durees[dk]*86400000);var now=new Date();
+    if(exp<now)return"R";if(exp<new Date(now.getTime()+180*86400000))return"O";return"V";}
+  agents.forEach(function(a,ai){
+    var r=ai+4;
+    var row=[a.matr,a.grade,a.nom,a.prenom,a.statut,a.permis,
+      a.vl_hu,a.vl_vtul,a.vlm,a.fmpa_vlm,a.vltt,a.fmpa_vltt,a.vlsmtt,a.vpsi,
+      a.fpt,a.fmpa_fpt,a.eps,a.fmpa_eps,a.ccfm,a.fmpa_ccfm,
+      a.ccfs,a.fmpa_ccfs,a.vpce,a.fmpa_vpce,a.respe,a.rem_bls,a.rem_brs,a.bls,a.brs];
+    for(var c=0;c<29;c++){
+      var ref=XLSX.utils.encode_cell({r:r,c:c});
+      if(!ws[ref])ws[ref]={t:"s",v:row[c]||""};
+      var bg=getBg(c);
+      if(CI.indexOf(c)>=0){
+        ws[ref].s=row[c]==="V"?S("C8E6C9","1B5E20",true,11,"center",false):S("FFCDD2","B71C1C",true,11,"center",false);
+      }else if(DI[c]){
+        var dc=getDC(row[c],DI[c]);
+        ws[ref].s=dc==="R"?S("FFCDD2","B71C1C",true,10,"center",false):
+          dc==="O"?S("FFE0B2","E65100",true,10,"center",false):
+          dc==="V"?S("C8E6C9","1B5E20",true,10,"center",false):
+          S(bg,"546E7A",false,10,"center",false);
+      }else{
+        ws[ref].s=S(bg,"263238",c===2,10,c>=2&&c<=4?"left":"center",false);
+      }
+    }
+  });
+  XLSX.utils.book_append_sheet(WB,ws,"LAO Conduite 2026");
+  XLSX.writeFile(WB,"LAO_Conduite_2026_export.xlsx",{cellStyles:true});
+}
+
+function exportWord(){
+  // Creer un lien de telechargement vers le fichier Word pre-genere
+  alert("Utilisez le bouton Excel pour exporter vos donnees. Le fichier Word est genere separement avec toutes les couleurs.");
+}
+
+function exportJSON(){
+  var exportData={agents:agents,durees:{
+    6:durees.permis,10:durees.vlm,12:durees.vltt,16:durees.fpt,
+    18:durees.eps,20:durees.ccfm,22:durees.ccfs,24:durees.vpce
+  }};
+  var blob=new Blob([JSON.stringify(exportData)],{type:'application/json'});
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='LAO_donnees_'+new Date().toISOString().slice(0,10)+'.json';
+  a.click();URL.revokeObjectURL(a.href);
+}
+
+// Modal édition identification
+function openEditCell(td, idx, field){
+  var labels={matr:"Matricule",grade:"Grade",nom:"Nom",prenom:"Prénom",statut:"Statut"};
+  var gradeOpts=["","SAP","CAP","CCH","SCH","SGT","SGH","ADJ","ADC","S/C","C/C","CAL","LTN","CNE","CDT","LCL","COL"];
+  var statutOpts=["","SPV","SPP","SPP/SPV","SPV/SPP","JSP/SPV","SPV/BMP","PATS"];
+
+  document.getElementById("editLabel").textContent = labels[field]||field;
+  var inp = document.getElementById("editInp");
+  var sel = document.getElementById("editSel");
+
+  inp.style.display="none"; sel.style.display="none";
+
+  if(field==="grade"){
+    sel.innerHTML=""; gradeOpts.forEach(function(o){var opt=document.createElement("option");opt.value=o;opt.textContent=o||"-- Grade --";sel.appendChild(opt);});
+    sel.value=agents[idx][field]||""; sel.style.display="block"; sel.focus();
+  } else if(field==="statut"){
+    sel.innerHTML=""; statutOpts.forEach(function(o){var opt=document.createElement("option");opt.value=o;opt.textContent=o||"-- Statut --";sel.appendChild(opt);});
+    sel.value=agents[idx][field]||""; sel.style.display="block"; sel.focus();
+  } else {
+    inp.value=agents[idx][field]||"";
+    if(field==="nom") inp.style.textTransform="uppercase"; else inp.style.textTransform="";
+    inp.style.display="block"; inp.focus(); inp.select();
+  }
+
+  document.getElementById("editIdx").value=idx;
+  document.getElementById("editField").value=field;
+  document.getElementById("mEdit").classList.add("on");
+}
+
+function closeEdit(){document.getElementById("mEdit").classList.remove("on");}
+
+function okEdit(){
+  var idx=+document.getElementById("editIdx").value;
+  var field=document.getElementById("editField").value;
+  var inp=document.getElementById("editInp");
+  var sel=document.getElementById("editSel");
+  var val=(inp.style.display!=="none"?inp.value:sel.value).trim();
+  if(field==="nom"||field==="prenom") val=val.toUpperCase();
+  agents[idx][field]=val;
+
+  // Re-trier si nom changé
+  if(field==="nom"||field==="prenom"){
+    agents.sort(function(a,b){return (a.nom||"").localeCompare(b.nom||"");});
+    filtered=agents.map(function(_,i){return i;});
+    render();
+  } else {
+    // Juste mettre à jour la cellule
+    var tr=document.querySelector("tr[data-i='"+idx+"']");
+    if(tr){
+      var td=tr.querySelector("td[data-field-id='"+field+"']");
+      if(td) td.textContent=val;
+    }
+    // Reconstruire la ligne
+    applyFilters();
+  }
+  updateStats();saveData();closeEdit();
+}
+
+document.addEventListener("keydown",function(e){
+  if(e.key==="Escape"){closeMD();closeMAdd();closeEdit();}
+  if(e.key==="Enter"){
+    if(document.getElementById("mD").classList.contains("on"))okD();
+    if(document.getElementById("mEdit").classList.contains("on"))okEdit();
+  }
+});
+if(document.getElementById("mEdit")){
+  document.getElementById("mEdit").addEventListener("click",function(e){
+    if(e.target===document.getElementById("mEdit"))closeEdit();
+  });
+}
+
+function exportCSV(){
+  var rows=[
+    ["Matr","Grade","Nom","Prenom","Statut","Val Permis",
+     "VL Hors Urg","VL VTUL VSAV","VLM","Date FMPA VLM","VLTT","Date FMPA VLTT","VLSMTT","VPSI",
+     "FPT VSR","Date FMPA FPT","EPS","Date FMPA EPS","CCFM","Date FMPA CCFM",
+     "CCFS","Date FMPA CCFS","VPCE","Date FMPA VPCE",
+     "RESPE","REM BLS","REM BRS","BLS","BRS"]
+  ];
+  agents.forEach(function(a){
+    rows.push([
+      a.matr,a.grade,a.nom,a.prenom,a.statut,a.permis,
+      a.vl_hu,a.vl_vtul,a.vlm,a.fmpa_vlm,a.vltt,a.fmpa_vltt,a.vlsmtt,a.vpsi,
+      a.fpt,a.fmpa_fpt,a.eps,a.fmpa_eps,a.ccfm,a.fmpa_ccfm,
+      a.ccfs,a.fmpa_ccfs,a.vpce,a.fmpa_vpce,
+      a.respe,a.rem_bls,a.rem_brs,a.bls,a.brs
+    ]);
+  });
+  var csv=rows.map(function(r){
+    return r.map(function(v){
+      var s=String(v||"");
+      if(s.indexOf(",")>=0||s.indexOf('"')>=0||s.indexOf("\n")>=0)
+        s='"'+s.replace(/"/g,'""')+'"';
+      return s;
+    }).join(",");
+  }).join("\n");
+  // BOM UTF-8 pour Excel/Sheets
+  var blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="LAO_Conduite_2026_"+new Date().toISOString().slice(0,10)+".csv";
+  a.click();URL.revokeObjectURL(a.href);
+}
+
+// ============================================================
+// CONFIGURATION SUPABASE (API REST directe - sans librairie)
+// ============================================================
+var SUPABASE_URL = "https://uopmaczvqemynjtsrdrx.supabase.co";
+var SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVvcG1hY3p2cWVteW5qdHNyZHJ4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg5NDMzMjAsImV4cCI6MjA5NDUxOTMyMH0.58dbS6qtevsWzlzMjr840harZ4jpD7C8D4GagBkYsmU";
+var ADMIN_PASSWORD = "8888";
+var isAdmin = false;
+var isWriter = false;
+var supabaseEnabled = true;
+window.readOnly = false;
+
+// API REST Supabase directe avec fetch
+var SB = {
+  headers: {
+    "apikey": SUPABASE_KEY,
+    "Authorization": "Bearer " + SUPABASE_KEY,
+    "Content-Type": "application/json",
+    "Prefer": "return=representation"
+  },
+  url: function(table, params) {
+    return SUPABASE_URL + "/rest/v1/" + table + (params ? "?" + params : "");
+  },
+  get: async function(table, params) {
+    var r = await fetch(SB.url(table, params), {headers: SB.headers});
+    if(!r.ok) throw new Error(await r.text());
+    return await r.json();
+  },
+  post: async function(table, body) {
+    var r = await fetch(SB.url(table), {method:"POST", headers: SB.headers, body: JSON.stringify(body)});
+    if(!r.ok) throw new Error(await r.text());
+    return await r.json();
+  },
+  patch: async function(table, params, body) {
+    var r = await fetch(SB.url(table, params), {method:"PATCH", headers: Object.assign({}, SB.headers, {"Prefer":"return=representation"}), body: JSON.stringify(body)});
+    if(!r.ok) throw new Error(await r.text());
+    return await r.json();
+  },
+  delete: async function(table, params) {
+    var r = await fetch(SB.url(table, params), {method:"DELETE", headers: SB.headers});
+    if(!r.ok) throw new Error(await r.text());
+    return true;
+  },
+  upsert: async function(table, body, onConflict) {
+    var h = Object.assign({}, SB.headers, {"Prefer": "resolution=merge-duplicates,return=representation"});
+    if(onConflict) h["on-conflict"] = onConflict;
+    var r = await fetch(SB.url(table), {method:"POST", headers: h, body: JSON.stringify(body)});
+    if(!r.ok) throw new Error(await r.text());
+    return await r.json();
+  }
+};
+
+// Tester la connexion
+fetch(SB.url("lao_agents", "limit=1"), {headers: SB.headers})
+  .then(function(r){ 
+    if(r.ok){ console.log("Supabase connecte"); loadFromSupabase(); }
+    else { console.log("Supabase erreur:", r.status); supabaseEnabled=false; }
+  })
+  .catch(function(e){ console.log("Supabase non disponible:", e); supabaseEnabled=false; });
+
+
+// Charger les données depuis Supabase
+async function loadFromSupabase(){
+  if(!supabaseEnabled) return;
+  try {
+    var res = await SB.get("lao_agents", "order=nom");
+    if(res && res.length > 0){
+      agents = res;
+      // Mettre à jour aussi le localStorage avec les données Supabase
+      try { localStorage.setItem("lao_agents", JSON.stringify(agents)); } catch(e){}
+      filtered = agents.map(function(_,i){return i;});
+      applyFilters();
+      updateStats();
+      showSaveStatus("Donnees chargees depuis Supabase ("+agents.length+" agents)");
+      console.log("Charges depuis Supabase:", agents.length, "agents");
+    }
+  } catch(e){ console.log("Erreur chargement Supabase:", e); }
+}
+
+// Sauvegarder un agent dans Supabase
+async function saveAgentToSupabase(agent){
+  if(!supabaseEnabled || (!isAdmin && !isWriter)) return;
+  try {
+    await SB.upsert("lao_agents", agent, "matr");
+  } catch(e){ console.log("Erreur sauvegarde Supabase:", e); }
+}
+
+// Mode Admin
+function toggleAdmin(){
+  if(isAdmin){
+    // Déconnexion
+    isAdmin = false;
+    setReadOnly();
+    document.getElementById("btnAdmin").textContent = "\uD83D\uDD12 Admin";
+    showSaveStatus("Mode lecture seule");
+  } else {
+    document.getElementById("adminPwd").value="";
+    document.getElementById("adminErr").style.display="none";
+    document.getElementById("mAdmin").classList.add("on");
+    setTimeout(function(){document.getElementById("adminPwd").focus();},100);
+  }
+}
+
+function closeAdmin(){document.getElementById("mAdmin").classList.remove("on");}
+
+
+
+document.addEventListener("keydown", function(e){
+  if(e.key==="Enter" && document.getElementById("mAdmin").classList.contains("on")) checkAdmin();
+});
+if(document.getElementById("mAdmin")){
+  document.getElementById("mAdmin").addEventListener("click",function(e){
+    if(e.target===document.getElementById("mAdmin"))closeAdmin();
+  });
+}
+
+function setReadOnly(){
+  var _ml=document.getElementById("modeLabel");if(_ml)_ml.textContent = "\uD83D\uDD12 LECTURE SEULE";
+  if(_ml)_ml.style.background = "#B71C1C";
+  // Désactiver les interactions
+  document.querySelectorAll("td.ck").forEach(function(td){td.style.pointerEvents="none";td.style.cursor="default";});
+  document.querySelectorAll("td.dt").forEach(function(td){td.style.pointerEvents="none";td.style.cursor="default";});
+  document.querySelectorAll("td[style*='cursor:pointer']").forEach(function(td){td.style.pointerEvents="none";});
+}
+
+function setWriteMode(){
+  var _ml=document.getElementById("modeLabel");if(_ml)_ml.textContent = "\u270F\uFE0F ECRITURE";
+  if(_ml)_ml.style.background = "#1B5E20";
+  document.querySelectorAll("td.ck").forEach(function(td){td.style.pointerEvents="";td.style.cursor="pointer";});
+  document.querySelectorAll("td.dt").forEach(function(td){td.style.pointerEvents="";td.style.cursor="pointer";});
+}
+
+// Supabase sauvegarde dans saveData()
+
+
+
+
+
+// Au démarrage : mode lecture seule si Supabase activé
+// Mode lecture desactive au demarrage
+
+// ============================================================
+// GESTION UTILISATEURS
+// ============================================================
+
+// Créer un compte utilisateur
+async function createUser(){
+  var nom = document.getElementById("uNom").value.trim().toUpperCase();
+  var prenom = document.getElementById("uPrenom").value.trim();
+  var pwd = document.getElementById("uPwd").value;
+  var pwd2 = document.getElementById("uPwd2").value;
+  var err = document.getElementById("uErr");
+
+  if(!nom||!prenom||!pwd){err.textContent="Tous les champs sont obligatoires.";err.style.display="block";return;}
+  if(pwd!==pwd2){err.textContent="Les mots de passe ne correspondent pas.";err.style.display="block";return;}
+  if(pwd.length<4){err.textContent="Mot de passe trop court (4 caractères minimum).";err.style.display="block";return;}
+
+  if(!supabaseEnabled){alert("Supabase non disponible en local. Utilisez GitHub Pages.");return;}
+  try {
+    var check = await SB.get("lao_users", "nom=eq."+nom+"&prenom=eq."+prenom);
+    if(check && check.length>0){err.textContent="Ce compte existe déjà.";err.style.display="block";return;}
+
+    await SB.post("lao_users", {nom:nom,prenom:prenom,mot_de_passe:pwd,actif:false});
+    document.getElementById("mCreateUser").classList.remove("on");
+    alert("Compte créé ! L'administrateur doit l'activer avant que vous puissiez vous connecter.");
+  } catch(e){
+    err.textContent="Erreur: "+e.message;err.style.display="block";
+  }
+}
+
+// Connexion utilisateur écriture
+async function loginUser(){
+  var nom = document.getElementById("lNom").value.trim().toUpperCase();
+  var prenom = document.getElementById("lPrenom").value.trim();
+  var pwd = document.getElementById("lPwd").value;
+  var err = document.getElementById("lErr");
+
+  if(!nom||!prenom||!pwd){err.textContent="Remplissez tous les champs.";err.style.display="block";return;}
+
+  if(!supabaseEnabled){alert("Supabase non disponible en local. Utilisez GitHub Pages.");return;}
+  try {
+    var res = await SB.get("lao_users", "nom=eq."+nom+"&prenom=eq."+prenom+"&mot_de_passe=eq."+pwd);
+    if(!res||res.length===0){err.textContent="Identifiants incorrects.";err.style.display="block";return;}
+    var userData=res[0];
+    if(!userData.actif){err.textContent="Votre compte n'est pas encore activé par l'administrateur.";err.style.display="block";return;}
+
+    // Connexion OK
+    isAdmin = false;
+    isWriter = userData.role === 'ecriture';
+    if(isWriter){
+      setWriteMode();
+    } else {
+      setReadOnly();
+    }
+    document.getElementById("mLoginUser").classList.remove("on");
+    var _ml=document.getElementById("modeLabel");if(_ml)_ml.textContent = "\u270F\uFE0F " + res.data.prenom + " " + res.data.nom;
+    showSaveStatus("Connecté en mode écriture");
+  } catch(e){
+    err.textContent="Erreur connexion.";err.style.display="block";
+  }
+}
+
+// Ouvrir gestion utilisateurs (admin seulement)
+async function openUsers(){
+  if(!isAdmin) return;
+  document.getElementById("mUsers").classList.add("on");
+  loadUsers();
+}
+
+async function loadUsers(){
+  var list = document.getElementById("usersList");
+  if(!supabaseEnabled){
+    list.innerHTML="<p style='color:#B71C1C;font-size:12px'>Supabase non disponible en local.<br>Ouvrez la LAO depuis GitHub Pages pour accéder à la gestion des utilisateurs.</p>";
+    return;
+  }
+  list.innerHTML = "<p style='font-size:11px;color:#999'>Chargement...</p>";
+  try {
+    var res = await SB.get("lao_users", "order=nom");
+    if(!res||res.length===0){
+      list.innerHTML="<p style='font-size:11px;color:#999'>Aucun utilisateur enregistré.</p>";
+      return;
+    }
+    list.innerHTML = res.map(function(u){
+      return '<div style="display:flex;align-items:center;gap:8px;padding:8px;border-bottom:1px solid #ECEFF1;font-size:12px">'+
+        '<span style="flex:1;font-weight:600">'+u.nom+' '+u.prenom+'</span>'+
+        '<span style="font-size:10px;color:#999">'+new Date(u.created_at).toLocaleDateString('fr-FR')+'</span>'+
+        '<span style="padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:'+(u.actif?"#C8E6C9":"#FFCDD2")+';color:'+(u.actif?"#1B5E20":"#B71C1C")+'">'+(u.actif?"Actif":"En attente")+'</span>'+
+        (u.actif
+          ? '<button onclick="deactivateUser('+u.id+')" style="padding:3px 8px;font-size:10px;background:#FFCDD2;color:#B71C1C;border:none;border-radius:4px;cursor:pointer">Désactiver</button>'
+          : '<button onclick="activateUser('+u.id+')" style="padding:3px 8px;font-size:10px;background:#C8E6C9;color:#1B5E20;border:none;border-radius:4px;cursor:pointer">Activer</button>')+
+        '<button onclick="resetPassword('+u.id+')" style="padding:3px 8px;font-size:10px;background:#E3F2FD;color:#1565C0;border:none;border-radius:4px;cursor:pointer">Reset pwd</button>'+
+        '<button onclick="deleteUser('+u.id+')" style="padding:3px 8px;font-size:10px;background:#FFCDD2;color:#B71C1C;border:none;border-radius:4px;cursor:pointer">&#x1F5D1;</button>'+
+        '</div>';
+    }).join('');
+  } catch(e){ list.innerHTML="<p style='color:red'>Erreur: "+e.message+"</p>"; }
+}
+
+async function activateUser(id){
+  await SB.patch("lao_users", "id=eq."+id, {actif:true});
+  loadUsers();
+}
+async function deactivateUser(id){
+  await SB.patch("lao_users", "id=eq."+id, {actif:false});
+  loadUsers();
+}
+async function resetPassword(id){
+  var newPwd = prompt("Nouveau mot de passe :");
+  if(!newPwd) return;
+  await SB.patch("lao_users", "id=eq."+id, {mot_de_passe:newPwd});
+  alert("Mot de passe réinitialisé !");
+  loadUsers();
+}
+async function deleteUser(id){
+  if(!confirm("Supprimer cet utilisateur ?")) return;
+  await SB.delete("lao_users", "id=eq."+id);
+  loadUsers();
+}
+
+async function setRole(id, role){
+  await SB.patch("lao_users", "id=eq."+id, {role:role});
+  loadUsers();
+}
+
+// Afficher bouton gestion users quand admin connecté
+var _origSetWriteMode = setWriteMode;
+var isWriter = false;
+
+// Modifier toggleAdmin pour afficher le bouton users
+var _origCheckAdmin = checkAdmin;
+function checkAdmin(){
+  var pwd = document.getElementById("adminPwd").value;
+  if(pwd === ADMIN_PASSWORD){
+    isAdmin = true;
+    setWriteMode();
+    document.getElementById("btnAdmin").textContent = "\uD83D\uDD13 Admin ON";
+    document.getElementById("btnAdmin").style.background = "rgba(0,200,0,.4)";
+    if(document.getElementById("btnUsers")) document.getElementById("btnUsers").style.display = "inline-block";
+    closeAdmin();
+    showSaveStatus("Mode admin actif");
+  } else {
+    document.getElementById("adminErr").style.display = "block";
+  }
+}
+</script>
+
+<!-- Modal édition identification -->
+<div class="ov" id="mEdit"><div class="mo" style="min-width:320px">
+  <h3 id="editLabel" style="font-size:13px;margin-bottom:12px;color:#1565C0">Modifier</h3>
+  <input type="hidden" id="editIdx">
+  <input type="hidden" id="editField">
+  <input type="text" id="editInp" style="width:100%;padding:8px;font-size:13px;border:2px solid #1565C0;border-radius:5px;margin-bottom:12px">
+  <select id="editSel" style="width:100%;padding:8px;font-size:13px;border:2px solid #1565C0;border-radius:5px;margin-bottom:12px;display:none">
+  </select>
+  <div class="mb">
+    <button class="bcn" onclick="closeEdit()">Annuler</button>
+    <button class="bok" onclick="okEdit()">&#x2713; Valider</button>
+  </div>
+</div></div>
+
+<!-- Modal Admin -->
+<div class="ov" id="mAdmin"><div class="mo" style="min-width:320px">
+  <h3 style="font-size:14px;margin-bottom:6px;color:#E65100">&#x1F512; Connexion Admin</h3>
+  <p style="font-size:11px;color:#666;margin-bottom:12px">Saisissez le mot de passe pour activer le mode écriture.</p>
+  <input type="password" id="adminPwd" placeholder="Mot de passe admin" style="width:100%;padding:8px;font-size:13px;border:2px solid #E65100;border-radius:5px;margin-bottom:8px">
+  <div id="adminErr" style="color:#B71C1C;font-size:11px;margin-bottom:8px;display:none">Mot de passe incorrect.</div>
+  <div class="mb">
+    <button class="bcn" onclick="closeAdmin()">Annuler</button>
+    <button style="background:#E65100;color:#fff;border:none;padding:5px 14px;border-radius:5px;font-weight:700;cursor:pointer" onclick="checkAdmin()">&#x1F513; Connexion</button>
+  </div>
+</div></div>
+
+<!-- Modal création compte utilisateur -->
+<div class="ov" id="mCreateUser"><div class="mo" style="min-width:340px">
+  <h3 style="font-size:14px;margin-bottom:6px;color:#1565C0">&#x1F464; Créer mon accès écriture</h3>
+  <p style="font-size:11px;color:#666;margin-bottom:12px">Créez votre compte pour demander un accès en écriture. L'administrateur devra l'activer.</p>
+  <div style="display:grid;gap:8px;margin-bottom:10px">
+    <input type="text" id="uNom" placeholder="Nom *" style="padding:7px;font-size:12px;border:1px solid #CFD8DC;border-radius:4px">
+    <input type="text" id="uPrenom" placeholder="Prénom *" style="padding:7px;font-size:12px;border:1px solid #CFD8DC;border-radius:4px">
+    <input type="password" id="uPwd" placeholder="Mot de passe *" style="padding:7px;font-size:12px;border:1px solid #CFD8DC;border-radius:4px">
+    <input type="password" id="uPwd2" placeholder="Confirmer le mot de passe *" style="padding:7px;font-size:12px;border:1px solid #CFD8DC;border-radius:4px">
+  </div>
+  <div id="uErr" style="color:#B71C1C;font-size:11px;margin-bottom:8px;display:none"></div>
+  <div class="mb">
+    <button class="bcn" onclick="document.getElementById('mCreateUser').classList.remove('on')">Annuler</button>
+    <button class="bok" onclick="createUser()">&#x2713; Créer mon compte</button>
+  </div>
+</div></div>
+
+<!-- Modal connexion utilisateur écriture -->
+<div class="ov" id="mLoginUser"><div class="mo" style="min-width:320px">
+  <h3 style="font-size:14px;margin-bottom:6px;color:#1565C0">&#x1F513; Connexion écriture</h3>
+  <div style="display:grid;gap:8px;margin-bottom:10px">
+    <input type="text" id="lNom" placeholder="Nom" style="padding:7px;font-size:12px;border:1px solid #CFD8DC;border-radius:4px">
+    <input type="text" id="lPrenom" placeholder="Prénom" style="padding:7px;font-size:12px;border:1px solid #CFD8DC;border-radius:4px">
+    <input type="password" id="lPwd" placeholder="Mot de passe" style="padding:7px;font-size:12px;border:1px solid #CFD8DC;border-radius:4px">
+  </div>
+  <div id="lErr" style="color:#B71C1C;font-size:11px;margin-bottom:8px;display:none"></div>
+  <div class="mb">
+    <button class="bcn" onclick="document.getElementById('mLoginUser').classList.remove('on')">Annuler</button>
+    <button style="background:#1565C0;color:#fff;border:none;padding:5px 14px;border-radius:5px;font-weight:700;cursor:pointer" onclick="loginUser()">Se connecter</button>
+  </div>
+  <p style="font-size:10px;color:#999;text-align:center;margin-top:8px">Pas encore de compte ? <a href="#" onclick="event.preventDefault();document.getElementById('mLoginUser').classList.remove('on');document.getElementById('mCreateUser').classList.add('on')" style="color:#1565C0">Créer un compte</a></p>
+</div></div>
+
+<!-- Modal gestion utilisateurs (admin) -->
+<div class="ov" id="mUsers"><div class="mo" style="min-width:480px;max-width:600px">
+  <h3 style="font-size:14px;margin-bottom:12px;color:#E65100">&#x1F465; Gestion des utilisateurs</h3>
+  <div id="usersList" style="max-height:350px;overflow-y:auto"></div>
+  <div class="mb" style="margin-top:12px">
+    <button class="bcn" onclick="document.getElementById('mUsers').classList.remove('on')">Fermer</button>
+  </div>
+</div></div>
+</body>
+</html>
